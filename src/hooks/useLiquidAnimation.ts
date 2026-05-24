@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useCallback } from 'react';
 import {
   useSharedValue,
   useAnimatedStyle,
@@ -91,13 +91,36 @@ export const useShineAnimation = (speed = 3000, autostart = true) => {
 };
 
 /**
- * Custom hook for 3D parallax tilt hover effects (Apple VisionOS-like)
+ * Custom hook for 3D parallax tilt hover effects (Apple VisionOS-like).
+ *
+ * FIX BUG #8: Previously used hardcoded width=300/height=180 which caused
+ * wrong tilt sensitivity on any card that wasn't exactly that size.
+ * Now the hook stores real layout dimensions via setDimensions(), which the
+ * consuming component should call from its onLayout handler.
  */
 export const use3DTiltAnimation = (maxTiltX = 8, maxTiltY = 8) => {
   const rotateX = useSharedValue(0);
   const rotateY = useSharedValue(0);
   const glowX = useSharedValue(0);
   const glowY = useSharedValue(0);
+  // Store measured dimensions as a shared value so the worklet can read them
+  const elementWidth = useSharedValue(300);
+  const elementHeight = useSharedValue(180);
+
+  /**
+   * Call this from the component's onLayout to provide accurate dimensions.
+   *
+   * ```tsx
+   * const { setDimensions, tiltHandlers, tiltStyle } = use3DTiltAnimation();
+   * <Animated.View onLayout={e => {
+   *   setDimensions(e.nativeEvent.layout.width, e.nativeEvent.layout.height);
+   * }} />
+   * ```
+   */
+  const setDimensions = useCallback((width: number, height: number) => {
+    elementWidth.value = width;
+    elementHeight.value = height;
+  }, []);
 
   const tiltStyle = useAnimatedStyle(() => {
     return {
@@ -120,21 +143,14 @@ export const use3DTiltAnimation = (maxTiltX = 8, maxTiltY = 8) => {
 
   const handleTouchMove = (event: GestureResponderEvent) => {
     const { locationX, locationY } = event.nativeEvent;
-    // We need target layout dimensions, if unavailable we estimate based on coordinates
-    // Assuming a generic card size or using ratio calculations
-    const target = event.currentTarget;
-    
-    // We calculate tilt relative to center of the touch area
-    // Fallback if measurement is delayed: use a standard bounds
-    const width = 300; // estimated fallback
-    const height = 180; // estimated fallback
-    
-    const xPct = (locationX - width / 2) / (width / 2);
-    const yPct = (locationY - height / 2) / (height / 2);
+    // Use measured dimensions from elementWidth/elementHeight shared values
+    const w = elementWidth.value;
+    const h = elementHeight.value;
+    const xPct = (locationX - w / 2) / (w / 2);
+    const yPct = (locationY - h / 2) / (h / 2);
 
     rotateY.value = withSpring(xPct * maxTiltY, APPLE_SPRING_CONFIG);
     rotateX.value = withSpring(-yPct * maxTiltX, APPLE_SPRING_CONFIG);
-    
     glowX.value = withSpring(xPct * 40, APPLE_SPRING_CONFIG);
     glowY.value = withSpring(yPct * 40, APPLE_SPRING_CONFIG);
   };
@@ -149,6 +165,7 @@ export const use3DTiltAnimation = (maxTiltX = 8, maxTiltY = 8) => {
   return {
     tiltStyle,
     glowStyle,
+    setDimensions,
     tiltHandlers: {
       onTouchMove: handleTouchMove,
       onTouchEnd: handleTouchEnd,

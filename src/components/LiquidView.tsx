@@ -1,7 +1,14 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, ViewProps, LayoutChangeEvent } from 'react-native';
 import { BlurView } from 'expo-blur';
-import { Canvas, BackdropFilter, RuntimeShader, Blur, Skia } from '@shopify/react-native-skia';
+import {
+  Canvas,
+  BackdropFilter,
+  Blur,
+  Skia,
+  Fill,
+  Shader,
+} from '@shopify/react-native-skia';
 import { useTheme } from '../hooks/useTheme';
 import { glassStyles, layoutStyles } from '../utils/glassStyles';
 import { REFRACTION_SHADER } from '../shaders/refractionShader';
@@ -9,6 +16,7 @@ import Animated, {
   useSharedValue,
   useDerivedValue,
   useAnimatedProps,
+  useFrameCallback,
   SharedValue,
 } from 'react-native-reanimated';
 
@@ -23,6 +31,8 @@ export interface LiquidViewProps extends ViewProps {
 }
 
 const AnimatedBlurView = Animated.createAnimatedComponent(BlurView);
+
+// Build the Skia RuntimeEffect once at module level (safe — Skia is initialized before import)
 const refractionEffect = Skia.RuntimeEffect.Make(REFRACTION_SHADER);
 
 export const LiquidView: React.FC<LiquidViewProps> = ({
@@ -39,46 +49,43 @@ export const LiquidView: React.FC<LiquidViewProps> = ({
   const { theme, isDark } = useTheme();
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
 
-  // Uniform values for Skia Refraction Shader
+  // Shader time uniform — updated on every UI-thread frame via useFrameCallback
   const time = useSharedValue(0);
-  
-  // Animation ticker for Skia shader ripples
-  React.useEffect(() => {
-    if (experimentalSkia) {
-      let animationFrameId: number;
-      const startTime = Date.now();
-      
-      const updateShaderTime = () => {
-        time.value = (Date.now() - startTime) / 1000;
-        animationFrameId = requestAnimationFrame(updateShaderTime);
-      };
-      
-      updateShaderTime();
-      return () => cancelAnimationFrame(animationFrameId);
-    }
-  }, [experimentalSkia]);
 
-  // Derived helper for worklet usage
+  // FIX BUG #3: Use useFrameCallback instead of requestAnimationFrame.
+  // useFrameCallback runs on the Reanimated UI thread — no JS bridge involvement,
+  // so the shader clock stays in sync with the display without causing JS jank.
+  useFrameCallback(
+    (frameInfo) => {
+      time.value = frameInfo.timestamp / 1000;
+    },
+    experimentalSkia // Only active when Skia mode is on
+  );
+
+  // Worklet-safe intensity reader
   const getIntensityRaw = () => {
     'worklet';
     if (typeof intensity === 'number') return intensity;
     return intensity.value;
   };
 
-  // Combine dimensions and uniforms
+  // FIX BUG #7: Separate the blur filter from the refraction shader.
+  // BackdropFilter(Blur) applies backdrop blurring on its own.
+  // The RuntimeShader is rendered on a Fill that covers the canvas,
+  // so its `image` uniform naturally receives the captured (blurred) backdrop.
   const skiaUniforms = useDerivedValue(() => {
     const rawInt = getIntensityRaw();
-    const strength = (rawInt / 100) * 0.08; // Limit distortion to safe aesthetic bounds
+    const strength = (rawInt / 100) * 0.08;
     return {
       resolution: [dimensions.width, dimensions.height],
-      uLightPos: [dimensions.width / 2, -50], // Default top-centered virtual light source
+      uLightPos: [dimensions.width / 2, -50],
       uTime: time.value,
       uDistortionStrength: strength,
       uSpecularIntensity: isDark ? 0.8 : 0.4,
     };
   }, [dimensions, isDark, intensity]);
 
-  // Derived Skia Blur radius
+  // Derived Skia blur radius
   const skiaBlurRadius = useDerivedValue(() => {
     return getIntensityRaw() * 0.3;
   }, [intensity]);
@@ -136,28 +143,31 @@ export const LiquidView: React.FC<LiquidViewProps> = ({
       {/* Background blur and overlay layers */}
       <View style={[layoutStyles.absoluteFill, layoutStyles.overflowHidden, { borderRadius }]}>
         {experimentalSkia && dimensions.width > 0 && dimensions.height > 0 && refractionEffect ? (
-          // GPU-Accelerated refraction backdrop pipeline
+          // FIX BUG #7: Two-pass Skia approach:
+          // 1. BackdropFilter blurs the scene behind this canvas.
+          // 2. A Fill with the RuntimeShader paints the refraction on top of the blur.
+          //    The shader's `image` uniform is automatically bound by Skia to the
+          //    backdrop snapshot (i.e., the blurred version of everything behind).
           <Canvas style={layoutStyles.absoluteFill}>
-            <BackdropFilter
-              filter={
-                <Blur blur={skiaBlurRadius} />
-              }
-            >
-              <RuntimeShader
-                source={refractionEffect}
-                uniforms={skiaUniforms}
-              />
+            {/* Pass 1: Apply backdrop blur */}
+            <BackdropFilter filter={<Blur blur={skiaBlurRadius} />}>
+              <Fill color="transparent" />
             </BackdropFilter>
+
+            {/* Pass 2: Refraction distortion + specular highlights on a full-canvas Fill */}
+            <Fill>
+              <Shader source={refractionEffect} uniforms={skiaUniforms} />
+            </Fill>
           </Canvas>
         ) : (
-          // Fast native blurring pipeline (using useAnimatedProps for reactive blurs)
+          // Fast native blurring pipeline
           <AnimatedBlurView
             animatedProps={animatedBlurProps}
             tint={tintProps.blurTint}
             style={layoutStyles.absoluteFill}
           />
         )}
-        
+
         {/* Soft glass background shading overlay */}
         <View
           style={[
@@ -188,4 +198,3 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
   },
 });
-

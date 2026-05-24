@@ -55,12 +55,16 @@ export const LiquidModal: React.FC<LiquidModalProps> = ({
     }
   }, [visible]);
 
+  // FIX BUG #10: Instead of a bare setTimeout (which can race with state changes),
+  // we use runOnJS inside withTiming's completion callback so onClose() fires
+  // only after the animation fully completes — no race conditions.
   const handleClose = () => {
-    backdropOpacity.value = withTiming(0, { duration: 250 });
     modalScale.value = withSpring(0.9, APPLE_SPRING_CONFIG);
-    setTimeout(() => {
-      onClose();
-    }, 250);
+    backdropOpacity.value = withTiming(0, { duration: 250 }, (finished) => {
+      if (finished) {
+        runOnJS(onClose)();
+      }
+    });
   };
 
   const backdropStyle = useAnimatedStyle(() => {

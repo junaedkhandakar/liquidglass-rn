@@ -36,7 +36,7 @@ export const LiquidCard: React.FC<LiquidCardProps> = ({
   const { theme } = useTheme();
 
   // Hooks for interactions
-  const { tiltStyle, tiltHandlers } = use3DTiltAnimation(10, 10);
+  const { tiltStyle, tiltHandlers, setDimensions } = use3DTiltAnimation(10, 10);
   const { pressStyle, pressHandlers } = usePressAnimation(0.98);
   const { shineProgress, triggerManualShine } = useShineAnimation(
     shineSpeed,
@@ -45,9 +45,12 @@ export const LiquidCard: React.FC<LiquidCardProps> = ({
 
   const containerWidth = useSharedValue(300); // Dynamic tracker for shine range
 
-  // Handle layouts to calculate shine displacement offsets
+  // Handle layouts to calculate shine displacement offsets and tilt dimensions
   const handleLayout = (e: any) => {
-    containerWidth.value = e.nativeEvent.layout.width;
+    const { width, height } = e.nativeEvent.layout;
+    containerWidth.value = width;
+    // FIX BUG #8: Provide real card dimensions to the tilt hook
+    setDimensions(width, height);
     if (props.onLayout) props.onLayout(e);
   };
 

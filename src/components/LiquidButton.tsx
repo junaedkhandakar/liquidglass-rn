@@ -238,6 +238,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 24,
     height: '100%',
+    minHeight: 48, // FIX BUG #9: Prevent collapse when parent has no explicit height
   },
   titleText: {
     fontSize: 16,

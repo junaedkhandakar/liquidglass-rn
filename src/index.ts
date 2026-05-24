@@ -23,5 +23,5 @@ export { REFRACTION_SHADER } from './shaders/refractionShader';
 export { LIQUID_FUSION_COLOR_MATRIX, LIQUID_PLASMA_SHADER } from './shaders/liquidShader';
 export { LiquidThemeColors, lightTheme, darkTheme } from './utils/theme';
 export { glassStyles, layoutStyles } from './utils/glassStyles';
-export { index as default } from './index';
-export const index = 'liquidrn';
+// FIX BUG #6: Removed circular self-export `export { index as default } from './index'`
+// and the meaningless `export const index = 'liquidrn'` string constant.

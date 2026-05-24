@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, Text, ScrollView, Switch, Alert, Dimensions, Pressable } from 'react-native';
+import { BlurView } from 'expo-blur';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import Animated, {
   useSharedValue,
@@ -104,13 +105,21 @@ function Dashboard() {
   return (
     <View style={[styles.mainContainer, { backgroundColor: theme.background }]}>
       {/* 
-        High-fidelity ambient glow backgrounds.
-        These blobs drift behind the frosted glass to create a breathtaking
-        glassmorphic depth.
+        FIX BUG #4: `filter: 'blur(60px)'` is a CSS-only property and is silently
+        ignored in React Native. We now wrap each blob in a BlurView so the glow
+        is actually rendered blurred on device.
       */}
       <View style={StyleSheet.absoluteFill} pointerEvents="none">
-        <Animated.View style={[styles.ambientBlob, styles.cyanBlob, blob1Style]} />
-        <Animated.View style={[styles.ambientBlob, styles.purpleBlob, blob2Style]} />
+        <Animated.View style={[styles.ambientBlobWrapper, styles.cyanBlobPos, blob1Style]}>
+          <BlurView intensity={70} tint="default" style={styles.ambientBlob}>
+            <View style={[styles.ambientBlobColor, { backgroundColor: '#00D2FF' }]} />
+          </BlurView>
+        </Animated.View>
+        <Animated.View style={[styles.ambientBlobWrapper, styles.purpleBlobPos, blob2Style]}>
+          <BlurView intensity={70} tint="default" style={styles.ambientBlob}>
+            <View style={[styles.ambientBlobColor, { backgroundColor: '#BF5AF2' }]} />
+          </BlurView>
+        </Animated.View>
       </View>
 
       {/* Dynamic Scroll-Linked Top Navbar */}
@@ -473,21 +482,30 @@ const styles = StyleSheet.create({
     flex: 1,
     position: 'relative',
   },
-  ambientBlob: {
+  // FIX BUG #4: Blob is now split into a wrapper (for position + animation) and
+  // inner views (BlurView + solid color) to achieve actual native blur.
+  ambientBlobWrapper: {
     position: 'absolute',
     width: 250,
     height: 250,
     borderRadius: 125,
-    filter: 'blur(60px)', // Standard CSS native blur fallback
-    opacity: 0.45,
+    overflow: 'hidden',
+    opacity: 0.55,
   },
-  cyanBlob: {
-    backgroundColor: '#00D2FF',
+  ambientBlob: {
+    flex: 1,
+    borderRadius: 125,
+    overflow: 'hidden',
+  },
+  ambientBlobColor: {
+    ...StyleSheet.absoluteFillObject,
+    borderRadius: 125,
+  },
+  cyanBlobPos: {
     top: '15%',
     left: '10%',
   },
-  purpleBlob: {
-    backgroundColor: '#BF5AF2',
+  purpleBlobPos: {
     bottom: '25%',
     right: '10%',
   },
