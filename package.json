@@ -1,5 +1,5 @@
 {
-  "name": "liquidglass-rn",
+  "name": "react-native-liquidglass",
   "version": "1.0.1",
   "description": "A modern open-source React Native UI library recreating Apple-style Liquid Glass effects for Expo and React Native applications.",
   "main": "src/index.ts",
@@ -28,13 +28,13 @@
   ],
   "author": "LiquidRN Team",
   "license": "MIT",
-  "homepage": "https://github.com/Junaed93/liquidglass-rn#readme",
+  "homepage": "https://github.com/Junaed93/react-native-liquidglass#readme",
   "bugs": {
-    "url": "https://github.com/Junaed93/liquidglass-rn/issues"
+    "url": "https://github.com/Junaed93/react-native-liquidglass/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Junaed93/liquidglass-rn.git"
+    "url": "git+https://github.com/Junaed93/react-native-liquidglass.git"
   },
   "dependencies": {
     "lucide-react-native": "^1.16.0"
