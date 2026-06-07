@@ -1,9 +1,12 @@
 {
-  "name": "liquidrn",
+  "name": "liquidglass-rn",
   "version": "1.0.0",
   "description": "A modern open-source React Native UI library recreating Apple-style Liquid Glass effects for Expo and React Native applications.",
   "main": "src/index.ts",
   "types": "src/index.ts",
+  "files": [
+    "src"
+  ],
   "scripts": {
     "start": "expo start",
     "android": "expo start --android",
@@ -34,12 +37,7 @@
     "url": "git+https://github.com/liquidrn/liquidrn.git"
   },
   "dependencies": {
-    "@shopify/react-native-skia": "*",
-    "expo-blur": "*",
-    "lucide-react-native": "^1.16.0",
-    "react-native-gesture-handler": "*",
-    "react-native-reanimated": "*",
-    "react-native-svg": "*"
+    "lucide-react-native": "^1.16.0"
   },
   "peerDependencies": {
     "@shopify/react-native-skia": "*",

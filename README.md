@@ -7,7 +7,7 @@ High-Performance, Apple VisionOS-Inspired Liquid Glass UI Elements for React Nat
 Expo SDK 54+ required. Skia GPU shaders require an Expo Development Client build (they do not work in Expo Go).
 
 ```bash
-npx expo install liquidrn @shopify/react-native-skia expo-blur react-native-reanimated react-native-gesture-handler react-native-svg lucide-react-native
+npx expo install liquidglass-rn @shopify/react-native-skia expo-blur react-native-reanimated react-native-gesture-handler react-native-svg lucide-react-native
 ```
 
 ## Quick Start
@@ -16,7 +16,7 @@ Always wrap your app root with `GestureHandlerRootView` and `LiquidThemeProvider
 
 ```tsx
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { LiquidThemeProvider, LiquidCard, LiquidButton } from 'liquidrn';
+import { LiquidThemeProvider, LiquidCard, LiquidButton } from 'liquidglass-rn';
 
 export default function App() {
   return (

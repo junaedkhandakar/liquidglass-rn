@@ -197,8 +197,8 @@ export const LiquidFAB: React.FC<LiquidFABProps> = ({
         Placed behind the icons, rendering the organic metaball connection
         between the main circular button and the secondary action circles.
       */}
-      <View style={styles.canvasContainer} pointerEvents="none">
-        <Canvas style={styles.canvas} onLayout={handleCanvasLayout}>
+      <View style={styles.canvasContainer} pointerEvents="none" onLayout={handleCanvasLayout}>
+        <Canvas style={styles.canvas}>
           {/* Main FAB blob — anchored to the bottom of the canvas */}
           <Circle
             cx={canvasCX}
