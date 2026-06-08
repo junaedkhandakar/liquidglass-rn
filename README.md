@@ -1,6 +1,6 @@
 # LiquidRN
 
-High-Performance, Apple VisionOS-Inspired Liquid Glass UI Elements for React Native & Expo
+High-Performance, Apple OS-Inspired Liquid Glass UI Elements for React Native & Expo
 
 ## Installation
 
@@ -9,7 +9,9 @@ Expo SDK 54+ required. Skia GPU shaders require an Expo Development Client build
 ```bash
 npx expo install liquidglass-rn @shopify/react-native-skia expo-blur react-native-reanimated react-native-gesture-handler react-native-svg lucide-react-native
 ```
-
+```bash
+npm i liquidglass-rn
+```
 ## Quick Start
 
 Always wrap your app root with `GestureHandlerRootView` and `LiquidThemeProvider`:
