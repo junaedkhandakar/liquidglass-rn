@@ -18,6 +18,8 @@ export interface LiquidSheetProps {
   isOpen: boolean;
   onClose: () => void;
   height?: number; // Custom sheet height
+  borderRadius?: number;
+  intensity?: number;
   children: React.ReactNode;
 }
 
@@ -27,6 +29,8 @@ export const LiquidSheet: React.FC<LiquidSheetProps> = ({
   isOpen,
   onClose,
   height = SCREEN_HEIGHT * 0.65, // Defaults to 65% of screen height
+  borderRadius = 32,
+  intensity = 65,
   children,
 }) => {
   const { theme, isDark } = useTheme();
@@ -54,10 +58,11 @@ export const LiquidSheet: React.FC<LiquidSheetProps> = ({
 
   const handleClose = () => {
     translateY.value = withSpring(height, APPLE_SPRING_CONFIG);
-    backdropOpacity.value = withTiming(0, { duration: 250 });
-    setTimeout(() => {
-      onClose();
-    }, 250);
+    backdropOpacity.value = withTiming(0, { duration: 250 }, (finished) => {
+      if (finished) {
+        runOnJS(onClose)();
+      }
+    });
   };
 
   // Modern Gesture API configuration
@@ -111,13 +116,13 @@ export const LiquidSheet: React.FC<LiquidSheetProps> = ({
         <Animated.View
           style={[
             styles.sheetContainer,
-            { height, borderTopLeftRadius: 32, borderTopRightRadius: 32 },
+            { height, borderTopLeftRadius: borderRadius, borderTopRightRadius: borderRadius },
             sheetStyle,
           ]}
         >
           <LiquidView
-            intensity={65}
-            borderRadius={32}
+            intensity={intensity}
+            borderRadius={borderRadius}
             tint={isDark ? 'dark' : 'light'}
             style={styles.sheetGlass}
           >

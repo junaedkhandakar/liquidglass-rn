@@ -32,8 +32,17 @@ export interface LiquidViewProps extends ViewProps {
 
 const AnimatedBlurView = Animated.createAnimatedComponent(BlurView);
 
-// Build the Skia RuntimeEffect once at module level (safe — Skia is initialized before import)
-const refractionEffect = Skia.RuntimeEffect.Make(REFRACTION_SHADER);
+// Build the Skia RuntimeEffect safely (guarding against environments without Skia native bindings)
+const refractionEffect = (() => {
+  try {
+    if (typeof Skia !== 'undefined' && Skia?.RuntimeEffect?.Make) {
+      return Skia.RuntimeEffect.Make(REFRACTION_SHADER);
+    }
+  } catch (e) {
+    // Graceful fallback if Skia is unavailable
+  }
+  return null;
+})();
 
 export const LiquidView: React.FC<LiquidViewProps> = ({
   intensity = 50,
@@ -48,37 +57,37 @@ export const LiquidView: React.FC<LiquidViewProps> = ({
 }) => {
   const { theme, isDark } = useTheme();
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
+  const dimensionsWidthSV = useSharedValue(0);
+  const dimensionsHeightSV = useSharedValue(0);
 
   // Shader time uniform — updated on every UI-thread frame via useFrameCallback
   const time = useSharedValue(0);
 
-  // FIX BUG #3: Use useFrameCallback instead of requestAnimationFrame.
-  // useFrameCallback runs on the Reanimated UI thread — no JS bridge involvement,
-  // so the shader clock stays in sync with the display without causing JS jank.
+  // Runs on the Reanimated UI thread — no JS bridge involvement
   useFrameCallback(
     (frameInfo) => {
       time.value = frameInfo.timestamp / 1000;
     },
-    experimentalSkia // Only active when Skia mode is on
+    experimentalSkia && !!refractionEffect
   );
 
   // Worklet-safe intensity reader
   const getIntensityRaw = () => {
     'worklet';
     if (typeof intensity === 'number') return intensity;
-    return intensity.value;
+    if (intensity && 'value' in intensity) return intensity.value;
+    return 50;
   };
 
-  // FIX BUG #7: Separate the blur filter from the refraction shader.
-  // BackdropFilter(Blur) applies backdrop blurring on its own.
-  // The RuntimeShader is rendered on a Fill that covers the canvas,
-  // so its `image` uniform naturally receives the captured (blurred) backdrop.
+  // Two-pass Skia approach with UI-thread dimensions
   const skiaUniforms = useDerivedValue(() => {
     const rawInt = getIntensityRaw();
     const strength = (rawInt / 100) * 0.08;
+    const w = dimensionsWidthSV.value || dimensions.width;
+    const h = dimensionsHeightSV.value || dimensions.height;
     return {
-      resolution: [dimensions.width, dimensions.height],
-      uLightPos: [dimensions.width / 2, -50],
+      resolution: [w, h],
+      uLightPos: [w / 2, -50],
       uTime: time.value,
       uDistortionStrength: strength,
       uSpecularIntensity: isDark ? 0.8 : 0.4,
@@ -100,6 +109,8 @@ export const LiquidView: React.FC<LiquidViewProps> = ({
   const handleLayout = (event: LayoutChangeEvent) => {
     const { width, height } = event.nativeEvent.layout;
     setDimensions({ width, height });
+    dimensionsWidthSV.value = width;
+    dimensionsHeightSV.value = height;
     if (props.onLayout) props.onLayout(event);
   };
 

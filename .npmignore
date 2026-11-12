@@ -1,0 +1,11 @@
+.github/
+assets/
+App.tsx
+app.json
+babel.config.js
+tsconfig.json
+.git/
+.gitignore
+AGENTS.md
+CLAUDE.md
+*.log

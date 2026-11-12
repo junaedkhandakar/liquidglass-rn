@@ -53,10 +53,12 @@ export const LiquidTabBar: React.FC<LiquidTabBarProps> = ({
   // Left and Right bounds of the liquid indicator
   const indicatorLeft = useSharedValue(0);
   const indicatorRight = useSharedValue(0);
+  const activeTabWidth = useSharedValue(80);
 
   useEffect(() => {
     if (tabLayouts.length === routes.length && tabLayouts[activeIndex]) {
       const activeLayout = tabLayouts[activeIndex];
+      activeTabWidth.value = activeLayout.width;
       const targetLeft = activeLayout.x;
       const targetRight = activeLayout.x + activeLayout.width;
 
@@ -106,12 +108,11 @@ export const LiquidTabBar: React.FC<LiquidTabBarProps> = ({
     };
   });
 
-  // Calculate dynamic vertical squish factor (thins out when stretched, bulges on snap)
+  // Calculate dynamic vertical squish factor via SharedValue (no stale React state in worklet)
   const interpolateWidthToScaleY = (w: number) => {
     'worklet';
-    if (tabLayouts.length === 0 || !tabLayouts[activeIndex]) return 1;
-    const baseWidth = tabLayouts[activeIndex].width;
-    if (baseWidth === 0) return 1;
+    const baseWidth = activeTabWidth.value;
+    if (baseWidth <= 0) return 1;
     const stretchRatio = w / baseWidth;
     // Stretch thins the vertical blob slightly (simulate surface tension)
     return Math.max(0.85, Math.min(1.1, 1 - (stretchRatio - 1) * 0.22));

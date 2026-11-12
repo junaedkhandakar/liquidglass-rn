@@ -1,12 +1,10 @@
 import React, { useState } from 'react';
-import { StyleSheet, Pressable, PressableProps, Text, ViewStyle, TextStyle, GestureResponderEvent, View } from 'react-native';
+import { StyleSheet, Pressable, PressableProps, Text, ViewStyle, TextStyle, GestureResponderEvent, View, LayoutChangeEvent } from 'react-native';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
-  withSpring,
   withTiming,
   interpolate,
-  useDerivedValue,
 } from 'react-native-reanimated';
 import { Canvas, Circle, Blur, ColorMatrix } from '@shopify/react-native-skia';
 import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
@@ -39,13 +37,14 @@ export const LiquidButton: React.FC<LiquidButtonProps> = ({
   title,
   style,
   textStyle,
+  disabled,
   children,
   ...props
 }) => {
   const { theme } = useTheme();
   
   // Interaction animations
-  const { pressStyle, pressHandlers, scale } = usePressAnimation(scaleOnPress ? 0.94 : 1);
+  const { pressStyle, pressHandlers } = usePressAnimation(scaleOnPress && !disabled ? 0.94 : 1);
   const { shineProgress, triggerManualShine } = useShineAnimation(3000, false);
   const [btnWidth, setBtnWidth] = useState(150);
   const [btnHeight, setBtnHeight] = useState(48);
@@ -56,13 +55,16 @@ export const LiquidButton: React.FC<LiquidButtonProps> = ({
   const rippleRadius = useSharedValue(0);
   const rippleOpacity = useSharedValue(0);
 
-  const handleLayout = (e: any) => {
+  const handleLayout = (e: LayoutChangeEvent) => {
     const { width, height } = e.nativeEvent.layout;
     setBtnWidth(width);
     setBtnHeight(height);
+    if (props.onLayout) props.onLayout(e);
   };
 
   const handlePressIn = (e: GestureResponderEvent) => {
+    if (disabled) return;
+
     // 1. Trigger tactile spring shrink
     pressHandlers.onPressIn();
 
@@ -89,6 +91,7 @@ export const LiquidButton: React.FC<LiquidButtonProps> = ({
   };
 
   const handlePressOut = (e: GestureResponderEvent) => {
+    if (disabled) return;
     pressHandlers.onPressOut();
     if (props.onPressOut) props.onPressOut(e);
   };
@@ -140,13 +143,17 @@ export const LiquidButton: React.FC<LiquidButtonProps> = ({
 
   return (
     <AnimatedPressable
+      accessibilityRole="button"
+      accessibilityState={{ disabled: !!disabled }}
+      disabled={disabled}
       onLayout={handleLayout}
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
       style={[
         styles.buttonWrapper,
-        scaleOnPress && pressStyle,
-        glow && glassStyles.glows.accent(theme.accentGlow),
+        disabled && styles.disabled,
+        scaleOnPress && !disabled && pressStyle,
+        glow && !disabled && glassStyles.glows.accent(theme.accentGlow),
         style as ViewStyle,
       ]}
       {...props}
@@ -154,7 +161,7 @@ export const LiquidButton: React.FC<LiquidButtonProps> = ({
       <LiquidView
         intensity={variantProps.intensity}
         borderRadius={16}
-        glowColor={glow ? theme.accentGlow : undefined}
+        glowColor={glow && !disabled ? theme.accentGlow : undefined}
         style={[
           styles.liquidView,
           {
@@ -166,7 +173,7 @@ export const LiquidButton: React.FC<LiquidButtonProps> = ({
         ]}
       >
         {/* Dynamic Skia Liquid Ripple Canvas */}
-        {liquidRipple && (
+        {liquidRipple && !disabled && (
           <View style={StyleSheet.absoluteFill} pointerEvents="none">
             <Canvas style={layoutStyles.absoluteFill}>
               {/* Blur + Contrast ColorMatrix = Organic Liquid Blend */}
@@ -179,7 +186,7 @@ export const LiquidButton: React.FC<LiquidButtonProps> = ({
         )}
 
         {/* Specular Diagonal Reflection Layer */}
-        {shineOnPress && (
+        {shineOnPress && !disabled && (
           <Animated.View
             style={[
               layoutStyles.absoluteFill,
@@ -213,6 +220,7 @@ export const LiquidButton: React.FC<LiquidButtonProps> = ({
               style={[
                 styles.titleText,
                 { color: variantProps.textColor },
+                disabled && styles.disabledText,
                 textStyle,
               ]}
             >
@@ -230,6 +238,12 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
     overflow: 'visible',
   },
+  disabled: {
+    opacity: 0.45,
+  },
+  disabledText: {
+    opacity: 0.7,
+  },
   liquidView: {
     width: '100%',
     height: '100%',
@@ -238,7 +252,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 24,
     height: '100%',
-    minHeight: 48, // FIX BUG #9: Prevent collapse when parent has no explicit height
+    minHeight: 48, // Prevent collapse when parent has no explicit height
   },
   titleText: {
     fontSize: 16,

@@ -143,11 +143,11 @@ export const use3DTiltAnimation = (maxTiltX = 8, maxTiltY = 8) => {
 
   const handleTouchMove = (event: GestureResponderEvent) => {
     const { locationX, locationY } = event.nativeEvent;
-    // Use measured dimensions from elementWidth/elementHeight shared values
-    const w = elementWidth.value;
-    const h = elementHeight.value;
-    const xPct = (locationX - w / 2) / (w / 2);
-    const yPct = (locationY - h / 2) / (h / 2);
+    // Use measured dimensions from elementWidth/elementHeight shared values, guarded against 0
+    const halfW = (elementWidth.value || 300) / 2;
+    const halfH = (elementHeight.value || 180) / 2;
+    const xPct = (locationX - halfW) / halfW;
+    const yPct = (locationY - halfH) / halfH;
 
     rotateY.value = withSpring(xPct * maxTiltY, APPLE_SPRING_CONFIG);
     rotateX.value = withSpring(-yPct * maxTiltX, APPLE_SPRING_CONFIG);

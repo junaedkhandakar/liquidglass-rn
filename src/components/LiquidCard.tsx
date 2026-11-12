@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, ViewStyle, GestureResponderEvent } from 'react-native';
+import { StyleSheet, ViewStyle, GestureResponderEvent, LayoutChangeEvent } from 'react-native';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -37,7 +37,7 @@ export const LiquidCard: React.FC<LiquidCardProps> = ({
 
   // Hooks for interactions
   const { tiltStyle, tiltHandlers, setDimensions } = use3DTiltAnimation(10, 10);
-  const { pressStyle, pressHandlers } = usePressAnimation(0.98);
+  const { pressStyle } = usePressAnimation(0.98);
   const { shineProgress, triggerManualShine } = useShineAnimation(
     shineSpeed,
     shineSpeed > 0
@@ -46,10 +46,9 @@ export const LiquidCard: React.FC<LiquidCardProps> = ({
   const containerWidth = useSharedValue(300); // Dynamic tracker for shine range
 
   // Handle layouts to calculate shine displacement offsets and tilt dimensions
-  const handleLayout = (e: any) => {
+  const handleLayout = (e: LayoutChangeEvent) => {
     const { width, height } = e.nativeEvent.layout;
     containerWidth.value = width;
-    // FIX BUG #8: Provide real card dimensions to the tilt hook
     setDimensions(width, height);
     if (props.onLayout) props.onLayout(e);
   };
@@ -75,7 +74,8 @@ export const LiquidCard: React.FC<LiquidCardProps> = ({
   });
 
   // Dynamic shadow style based on depth and active theme
-  const cardShadow = glassStyles.shadows[shadowDepth](theme.isDark);
+  const shadowFn = glassStyles.shadows[shadowDepth] || glassStyles.shadows.medium;
+  const cardShadow = shadowFn(theme.isDark);
 
   // Combine interactive elements
   const combinedHandlers = {

@@ -35,8 +35,7 @@ const interpolateScale = (val: number) => {
   return val;
 };
 
-// FIX BUG #1: The maximum number of actions is capped at a constant so that all
-// hooks are pre-allocated unconditionally on every render — no hooks inside .map().
+// Constant to pre-allocate hooks unconditionally
 const MAX_ACTIONS = 8;
 
 export const LiquidFAB: React.FC<LiquidFABProps> = ({
@@ -47,9 +46,10 @@ export const LiquidFAB: React.FC<LiquidFABProps> = ({
   const { theme } = useTheme();
   const [isOpen, setIsOpen] = useState(false);
 
-  // FIX BUG #2: Measure the actual Skia canvas size via onLayout instead of
-  // relying on hardcoded pixel values (70 / 270) that break on every device.
+  // Measure actual Skia canvas size via onLayout
   const [canvasSize, setCanvasSize] = useState({ width: 140, height: 400 });
+  const canvasWidthSV = useSharedValue(140);
+  const canvasHeightSV = useSharedValue(400);
 
   const animationProgress = useSharedValue(0);
 
@@ -66,7 +66,7 @@ export const LiquidFAB: React.FC<LiquidFABProps> = ({
   const itemSize = 48;
   const spacing = 16;
 
-  // FIX BUG #1: Pre-allocate MAX_ACTIONS derived values unconditionally so hook
+  // Pre-allocate MAX_ACTIONS derived values unconditionally so hook
   // call order never changes between renders regardless of actions.length.
   const displacement0 = useDerivedValue(() => {
     if (0 >= actions.length) return 0;
@@ -109,13 +109,28 @@ export const LiquidFAB: React.FC<LiquidFABProps> = ({
     return animationProgress.value * target;
   });
 
-  // Collect into an array for indexed access in render
   const allDisplacements = [
     displacement0, displacement1, displacement2, displacement3,
     displacement4, displacement5, displacement6, displacement7,
   ];
 
-  // FIX BUG #1: Pre-allocate MAX_ACTIONS animated styles unconditionally.
+  // Canvas center coordinates derived from layout shared values
+  const canvasCXSV = useDerivedValue(() => canvasWidthSV.value / 2);
+  const canvasMainCYSV = useDerivedValue(() => canvasHeightSV.value - fabSize / 2);
+
+  // Pre-allocate secondary blob CY derived values at the top level to strictly adhere to Rules of Hooks
+  const cy0 = useDerivedValue(() => canvasMainCYSV.value + displacement0.value);
+  const cy1 = useDerivedValue(() => canvasMainCYSV.value + displacement1.value);
+  const cy2 = useDerivedValue(() => canvasMainCYSV.value + displacement2.value);
+  const cy3 = useDerivedValue(() => canvasMainCYSV.value + displacement3.value);
+  const cy4 = useDerivedValue(() => canvasMainCYSV.value + displacement4.value);
+  const cy5 = useDerivedValue(() => canvasMainCYSV.value + displacement5.value);
+  const cy6 = useDerivedValue(() => canvasMainCYSV.value + displacement6.value);
+  const cy7 = useDerivedValue(() => canvasMainCYSV.value + displacement7.value);
+
+  const allCY = [cy0, cy1, cy2, cy3, cy4, cy5, cy6, cy7];
+
+  // Pre-allocate MAX_ACTIONS animated styles unconditionally
   const actionStyle0 = useAnimatedStyle(() => ({
     transform: [{ translateY: allDisplacements[0].value }, { scale: interpolateScale(animationProgress.value) }],
     opacity: withSpring(animationProgress.value, { damping: 15 }),
@@ -178,16 +193,11 @@ export const LiquidFAB: React.FC<LiquidFABProps> = ({
 
   const MainIcon = (Icons[icon] || Icons.Plus) as any;
 
-  // FIX BUG #2: Canvas center computed from measured layout, not hardcoded.
-  const canvasCX = canvasSize.width / 2;
-  // Main FAB is anchored at the bottom — cy is canvas height minus half the fab radius.
-  const canvasMainCY = canvasSize.height - fabSize / 2;
-
   const handleCanvasLayout = (e: LayoutChangeEvent) => {
-    setCanvasSize({
-      width: e.nativeEvent.layout.width,
-      height: e.nativeEvent.layout.height,
-    });
+    const { width, height } = e.nativeEvent.layout;
+    setCanvasSize({ width, height });
+    canvasWidthSV.value = width;
+    canvasHeightSV.value = height;
   };
 
   return (
@@ -201,28 +211,22 @@ export const LiquidFAB: React.FC<LiquidFABProps> = ({
         <Canvas style={styles.canvas}>
           {/* Main FAB blob — anchored to the bottom of the canvas */}
           <Circle
-            cx={canvasCX}
-            cy={canvasMainCY}
+            cx={canvasCXSV}
+            cy={canvasMainCYSV}
             r={fabSize / 2}
             color={theme.accentColor}
           />
 
-          {/* Secondary liquid blobs — positions driven by measured layout */}
-          {actions.slice(0, MAX_ACTIONS).map((_, index) => {
-            // cy is derived from the pre-allocated displacement shared values
-            const cy = useDerivedValue(
-              () => canvasMainCY + allDisplacements[index].value
-            );
-            return (
-              <Circle
-                key={index}
-                cx={canvasCX}
-                cy={cy}
-                r={itemSize / 2}
-                color={theme.accentColor}
-              />
-            );
-          })}
+          {/* Secondary liquid blobs — driven by top-level pre-allocated derived values (No hooks in loop!) */}
+          {actions.slice(0, MAX_ACTIONS).map((_, index) => (
+            <Circle
+              key={index}
+              cx={canvasCXSV}
+              cy={allCY[index]}
+              r={itemSize / 2}
+              color={theme.accentColor}
+            />
+          ))}
 
           {/* Group mask to fuse shapes into organic metaballs */}
           <Blur blur={12} />

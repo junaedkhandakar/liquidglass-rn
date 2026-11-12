@@ -1,10 +1,10 @@
 import React from 'react';
-import { StyleSheet, View, Text, StatusBar, SafeAreaView } from 'react-native';
+import { StyleSheet, View, Text, StatusBar, SafeAreaView, ViewStyle, TextStyle } from 'react-native';
 import Animated, {
   useAnimatedStyle,
   useDerivedValue,
   interpolate,
-  Extrapolate,
+  Extrapolation,
   SharedValue,
 } from 'react-native-reanimated';
 import { LiquidView } from './LiquidView';
@@ -18,6 +18,9 @@ export interface LiquidNavbarProps {
   sticky?: boolean;
   scrollY?: SharedValue<number>;  // Dynamic scroll shared value
   maxScrollOffset?: number;      // Scroll threshold to reach full blur (default 80)
+  titleStyle?: TextStyle;
+  style?: ViewStyle;
+  contentStyle?: ViewStyle;
 }
 
 const AnimatedLiquidView = Animated.createAnimatedComponent(LiquidView);
@@ -29,6 +32,9 @@ export const LiquidNavbar: React.FC<LiquidNavbarProps> = ({
   sticky = true,
   scrollY,
   maxScrollOffset = 80,
+  titleStyle,
+  style,
+  contentStyle,
 }) => {
   const { theme, isDark } = useTheme();
 
@@ -39,7 +45,7 @@ export const LiquidNavbar: React.FC<LiquidNavbarProps> = ({
       scrollY.value,
       [0, maxScrollOffset],
       [0, 75], // Smooth fade from transparent to highly frosted glass
-      Extrapolate.CLAMP
+      Extrapolation.CLAMP
     );
   });
 
@@ -51,7 +57,7 @@ export const LiquidNavbar: React.FC<LiquidNavbarProps> = ({
       scrollY.value,
       [0, maxScrollOffset],
       [0, 1],
-      Extrapolate.CLAMP
+      Extrapolation.CLAMP
     );
 
     return {
@@ -59,7 +65,7 @@ export const LiquidNavbar: React.FC<LiquidNavbarProps> = ({
         scrollY.value,
         [-20, 0],
         [0, 1],
-        Extrapolate.CLAMP
+        Extrapolation.CLAMP
       ),
       borderBottomWidth: 1,
       borderBottomColor: isDark 
@@ -74,6 +80,7 @@ export const LiquidNavbar: React.FC<LiquidNavbarProps> = ({
         styles.outerContainer,
         sticky && styles.stickyHeader,
         animatedStyle,
+        style,
       ]}
     >
       <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
@@ -84,7 +91,7 @@ export const LiquidNavbar: React.FC<LiquidNavbarProps> = ({
           borderRadius={0}
           style={styles.innerView}
         >
-          <View style={[layoutStyles.row, styles.content]}>
+          <View style={[layoutStyles.row, styles.content, contentStyle]}>
             {/* Left slot */}
             <View style={styles.sideSlot}>
               {leftComponent}
@@ -97,6 +104,7 @@ export const LiquidNavbar: React.FC<LiquidNavbarProps> = ({
                 style={[
                   styles.titleText,
                   { color: theme.textColor },
+                  titleStyle,
                 ]}
               >
                 {title}

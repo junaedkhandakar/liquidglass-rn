@@ -1,11 +1,19 @@
 {
   "name": "liquidglass-rn",
-  "version": "1.0.2",
+  "version": "1.0.4",
   "description": "A modern open-source React Native UI library recreating Apple-style Liquid Glass effects for Expo and React Native applications.",
   "main": "src/index.ts",
   "types": "src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
   "files": [
-    "src"
+    "src",
+    "README.md",
+    "LICENSE"
   ],
   "scripts": {
     "start": "expo start",
@@ -24,7 +32,10 @@
     "visionos",
     "apple-ui",
     "react-native-reanimated",
-    "react-native-skia"
+    "react-native-skia",
+    "blur",
+    "metaball",
+    "ui-library"
   ],
   "author": "LiquidRN Team",
   "license": "MIT",
