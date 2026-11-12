@@ -54,11 +54,13 @@ jobs:
             npm install --no-audit --no-fund
           fi
 
-      # No token needed: npm detects the GitHub OIDC environment and exchanges
-      # it for a short-lived publish credential with provenance attestation.
+      # Authenticates via npm Trusted Publishing (OIDC) or NPM_TOKEN secret.
+      # Generates a provenance attestation linking the release to this repository.
       - name: Publish to npm
         run: |
           npm publish --provenance --access public
-          echo "### 🚀 Successfully Published via Trusted Publishing (OIDC)!" >> $GITHUB_STEP_SUMMARY
+          echo "### 🚀 Successfully Published!" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "Package is live at: [https://www.npmjs.com/package/liquidglass-rn](https://www.npmjs.com/package/liquidglass-rn)" >> $GITHUB_STEP_SUMMARY
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
