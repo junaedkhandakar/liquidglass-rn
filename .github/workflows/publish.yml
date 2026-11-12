@@ -1,25 +1,3 @@
-# Publish liquidglass-rn to npm using trusted publishing (OIDC).
-#
-# No NPM_TOKEN secret is involved. npm verifies this workflow's identity through
-# GitHub's OIDC provider and issues a short-lived, single-use credential, so
-# there is no long-lived write token to leak or rotate. This is also the only
-# way to get a provenance attestation, which is what links the npm package page
-# back to this repository and commit.
-#
-# One-time setup on npmjs.com (if not already done):
-#   1. Open https://www.npmjs.com/package/liquidglass-rn/access
-#   2. Scroll to "Trusted Publisher" -> "Add publisher" -> "GitHub Actions"
-#   3. Fill in:
-#        Organization or user : junaedkhandakar
-#        Repository           : liquidglass-rn
-#        Workflow filename    : publish.yml
-#        Environment name     : (leave blank)
-#   4. Click "Add publisher".
-#
-# Release flow:
-#   Pushing a tag (e.g. git push origin v1.0.4) or clicking "Run workflow" in GitHub Actions
-#   starts this workflow, which automatically exchanges OIDC tokens, publishes, and signs the package.
-
 name: publish
 
 on:
@@ -40,10 +18,16 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
+      - name: Setup Node.js 24
         uses: actions/setup-node@v4
         with:
-          node-version: "22"
+          node-version: "24"
+          registry-url: "https://registry.npmjs.org"
+
+      - name: Ensure npm CLI supports OIDC trusted publishing
+        run: |
+          npm install -g npm@latest
+          npm --version
 
       - name: Install dependencies
         run: |
@@ -53,8 +37,6 @@ jobs:
             npm install --no-audit --no-fund
           fi
 
-      # No token: npm detects the GitHub OIDC environment and exchanges
-      # it for a short-lived publish credential. Provenance is generated automatically.
       - name: Publish to npm
         run: |
           npm publish --provenance --access public
