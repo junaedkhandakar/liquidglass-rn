@@ -1,24 +1,40 @@
-name: Publish directly to npm
+# Publish liquidglass-rn to npm using trusted publishing (OIDC).
+#
+# No NPM_TOKEN secret is involved. npm verifies this workflow's identity through
+# GitHub's OIDC provider and issues a short-lived, single-use credential, so
+# there is no long-lived write token to leak or rotate. This is also the only
+# way to get a provenance attestation, which is what links the npm package page
+# back to this repository and commit.
+#
+# One-time setup on npmjs.com (if not already done):
+#   1. Open https://www.npmjs.com/package/liquidglass-rn/access
+#   2. Scroll to "Trusted Publisher" -> "Add publisher" -> "GitHub Actions"
+#   3. Fill in:
+#        Organization or user : junaedkhandakar
+#        Repository           : liquidglass-rn
+#        Workflow filename    : publish.yml
+#        Environment name     : (leave blank)
+#   4. Click "Add publisher".
+#
+# Release flow:
+#   Pushing a tag (e.g. git push origin v1.0.4) or clicking "Run workflow" in GitHub Actions
+#   starts this workflow, which automatically exchanges OIDC tokens, publishes, and signs the package.
+
+name: publish
 
 on:
-  release:
-    types: [published]
   push:
     tags:
-      - 'v*'
+      - "v*"
   workflow_dispatch:
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 permissions:
+  id-token: write # required: lets the job mint the OIDC token npm verifies
   contents: read
-  id-token: write
 
 jobs:
   publish:
-    name: Publish liquidglass-rn to npm
+    name: Publish liquidglass-rn via OIDC
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -27,17 +43,22 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22.x
-          registry-url: 'https://registry.npmjs.org'
+          node-version: "22"
+          registry-url: "https://registry.npmjs.org"
 
       - name: Install dependencies
-        run: npm install
-
-      - name: Publish directly to npm registry
         run: |
-          npm publish --access public
-          echo "### 🚀 Package Published Successfully!" >> $GITHUB_STEP_SUMMARY
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            npm install --no-audit --no-fund
+          fi
+
+      # No token needed: npm detects the GitHub OIDC environment and exchanges
+      # it for a short-lived publish credential with provenance attestation.
+      - name: Publish to npm
+        run: |
+          npm publish --provenance --access public
+          echo "### 🚀 Successfully Published via Trusted Publishing (OIDC)!" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "Your package is live on npm at: [https://www.npmjs.com/package/liquidglass-rn](https://www.npmjs.com/package/liquidglass-rn)" >> $GITHUB_STEP_SUMMARY
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          echo "Package is live at: [https://www.npmjs.com/package/liquidglass-rn](https://www.npmjs.com/package/liquidglass-rn)" >> $GITHUB_STEP_SUMMARY
