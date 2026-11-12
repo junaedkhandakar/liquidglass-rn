@@ -39,13 +39,13 @@
   ],
   "author": "Junaed Khandakar",
   "license": "MIT",
-  "homepage": "https://github.com/Junaed93/liquidglass-rn#readme",
+  "homepage": "https://github.com/junaedkhandakar/liquidglass-rn#readme",
   "bugs": {
-    "url": "https://github.com/Junaed93/liquidglass-rn/issues"
+    "url": "https://github.com/junaedkhandakar/liquidglass-rn/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Junaed93/liquidglass-rn.git"
+    "url": "git+https://github.com/junaedkhandakar/liquidglass-rn.git"
   },
   "dependencies": {
     "lucide-react-native": "^1.16.0"
