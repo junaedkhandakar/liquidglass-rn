@@ -45,7 +45,11 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/junaedkhandakar/liquidglass-rn.git"
+    "url": "https://github.com/junaedkhandakar/liquidglass-rn"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
   },
   "dependencies": {
     "lucide-react-native": "^1.16.0"
