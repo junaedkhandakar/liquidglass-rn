@@ -1,6 +1,7 @@
 .github/
 assets/
 docs/
+serve.js
 App.tsx
 app.json
 babel.config.js
