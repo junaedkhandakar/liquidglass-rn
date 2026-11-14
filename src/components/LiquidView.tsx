@@ -191,6 +191,19 @@ export const LiquidView: React.FC<LiquidViewProps> = ({
             },
           ]}
         />
+
+        {/* Top-edge razor-sharp specular reflection bevel */}
+        <View
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: borderRadius * 0.5,
+            right: borderRadius * 0.5,
+            height: 1,
+            backgroundColor: isDark ? 'rgba(255, 255, 255, 0.45)' : 'rgba(255, 255, 255, 0.85)',
+          }}
+          pointerEvents="none"
+        />
       </View>
 
       {/* Children content container */}

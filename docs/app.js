@@ -1,4 +1,4 @@
-// liquidglass-rn Apple Liquid Glass Engine & Simulator
+// liquidglass-rn Hyper-Real Apple Liquid Glass Engine
 
 document.addEventListener('DOMContentLoaded', () => {
   // Elements
@@ -14,38 +14,24 @@ document.addEventListener('DOMContentLoaded', () => {
   const phoneScreen = document.getElementById('phone-screen');
   const simScrollArea = document.getElementById('sim-scroll-area');
   const previewNavbar = document.getElementById('preview-navbar');
-  const interactiveCard = document.getElementById('interactive-card');
+  const liquidGlassCard = document.getElementById('interactive-card');
   const interactiveBtn = document.getElementById('interactive-btn');
   const simPlayBtn = document.getElementById('sim-play-btn');
   const simThemeToggle = document.getElementById('sim-theme-toggle');
 
-  // Liquid Tab Bar Elements
+  // Liquid Tab Bar
   const tabNavContainer = document.getElementById('tab-nav-container');
   const tabButtons = document.querySelectorAll('.liquid-tab-btn');
   const liquidPill = document.getElementById('liquid-pill');
   let currentTabIndex = 0;
   let isTabAnimating = false;
-  let tabAnimationSpeed = 1.0; // 1.0 = normal, 0.3 = slow motion
+  let tabAnimationSpeed = 1.0;
 
-  // Speed controls
-  const speedNormalBtn = document.getElementById('speed-normal');
-  const speedSlowBtn = document.getElementById('speed-slow');
-
-  // Overlays
-  const openModalBtn = document.getElementById('open-modal-btn');
-  const closeModalBtn = document.getElementById('close-modal-btn');
-  const previewModal = document.getElementById('preview-modal');
-  const modalCard = document.getElementById('modal-card');
-
-  const openSheetBtn = document.getElementById('open-sheet-btn');
-  const closeSheetBtn = document.getElementById('close-sheet-btn');
-  const previewSheet = document.getElementById('preview-sheet');
-
-  // FAB
-  const mainFabBtn = document.getElementById('main-fab-btn');
-  const fabIcon = document.getElementById('fab-icon');
-  const fabActions = document.getElementById('fab-actions');
-  let isFabOpen = false;
+  // Control Center Glass Slider
+  const sliderTrack = document.getElementById('volume-slider-track');
+  const sliderFill = document.getElementById('volume-slider-fill');
+  const sliderValText = document.getElementById('volume-val');
+  let isDraggingSlider = false;
 
   // Playground Controls
   const blurSlider = document.getElementById('blur-slider');
@@ -53,14 +39,12 @@ document.addEventListener('DOMContentLoaded', () => {
   const modeDarkBtn = document.getElementById('mode-dark');
   const modeLightBtn = document.getElementById('mode-light');
   const glowToggle = document.getElementById('glow-toggle');
-  const tiltToggle = document.getElementById('tilt-toggle');
 
   let currentBlur = 55;
   let isSimulatorDark = true;
-  let isTiltEnabled = true;
   let isGlowEnabled = true;
 
-  // 1. Main Site Theme Toggle
+  // 1. Site Theme Toggle
   themeToggle.addEventListener('click', () => {
     html.classList.toggle('dark');
     const isDark = html.classList.contains('dark');
@@ -72,13 +56,11 @@ document.addEventListener('DOMContentLoaded', () => {
   function setSimulatorTheme(dark) {
     isSimulatorDark = dark;
     if (dark) {
-      phoneScreen.classList.remove('ios-wallpaper-light', 'light');
-      phoneScreen.classList.add('ios-wallpaper-dark');
+      phoneScreen.classList.remove('light');
       modeDarkBtn.className = 'py-2 px-3 rounded-xl bg-blue-600/30 border border-blue-500/50 text-xs font-semibold text-blue-200 transition';
       modeLightBtn.className = 'py-2 px-3 rounded-xl bg-white/5 border border-white/10 text-xs font-semibold text-zinc-400 hover:text-white transition';
     } else {
-      phoneScreen.classList.remove('ios-wallpaper-dark');
-      phoneScreen.classList.add('ios-wallpaper-light', 'light');
+      phoneScreen.classList.add('light');
       modeLightBtn.className = 'py-2 px-3 rounded-xl bg-blue-600/30 border border-blue-500/50 text-xs font-semibold text-blue-200 transition';
       modeDarkBtn.className = 'py-2 px-3 rounded-xl bg-white/5 border border-white/10 text-xs font-semibold text-zinc-400 hover:text-white transition';
     }
@@ -89,7 +71,68 @@ document.addEventListener('DOMContentLoaded', () => {
   modeLightBtn.addEventListener('click', () => setSimulatorTheme(false));
   simThemeToggle.addEventListener('click', () => setSimulatorTheme(!isSimulatorDark));
 
-  // 3. Apple Liquid Tab Bar Physics Engine (Asymmetric Fluid Stretch & Surface Tension Squash)
+  // 3. Real-time Caustic Light Reflection & Liquid Wave Ripple on LiquidCard
+  liquidGlassCard.addEventListener('mousemove', (e) => {
+    const rect = liquidGlassCard.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    liquidGlassCard.style.setProperty('--mouse-x', `${(x / rect.width) * 100}%`);
+    liquidGlassCard.style.setProperty('--mouse-y', `${(y / rect.height) * 100}%`);
+  });
+
+  liquidGlassCard.addEventListener('click', (e) => {
+    if (e.target.tagName.toLowerCase() === 'button' || e.target.closest('button')) return;
+    const rect = liquidGlassCard.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    const wave = document.createElement('span');
+    wave.className = 'liquid-wave-ripple';
+    const size = Math.max(rect.width, rect.height) * 0.8;
+    wave.style.width = wave.style.height = `${size}px`;
+    wave.style.left = `${x - size / 2}px`;
+    wave.style.top = `${y - size / 2}px`;
+
+    liquidGlassCard.appendChild(wave);
+    setTimeout(() => wave.remove(), 750);
+  });
+
+  // 4. Elastic iOS Rubber-Banding Drag for LiquidCard
+  let isCardDragging = false;
+  let cardDragStartX = 0;
+  let cardDragStartY = 0;
+  let cardOffsetX = 0;
+  let cardOffsetY = 0;
+
+  liquidGlassCard.addEventListener('mousedown', (e) => {
+    if (e.target.tagName.toLowerCase() === 'button' || e.target.closest('button')) return;
+    isCardDragging = true;
+    cardDragStartX = e.clientX - cardOffsetX;
+    cardDragStartY = e.clientY - cardOffsetY;
+    liquidGlassCard.style.cursor = 'grabbing';
+  });
+
+  window.addEventListener('mousemove', (e) => {
+    if (!isCardDragging) return;
+    cardOffsetX = (e.clientX - cardDragStartX) * 0.42; // elastic resistance
+    cardOffsetY = (e.clientY - cardDragStartY) * 0.42;
+    liquidGlassCard.style.transform = `translate(${cardOffsetX}px, ${cardOffsetY}px) scale(0.98)`;
+  });
+
+  window.addEventListener('mouseup', () => {
+    if (!isCardDragging) return;
+    isCardDragging = false;
+    liquidGlassCard.style.cursor = 'grab';
+    cardOffsetX = 0;
+    cardOffsetY = 0;
+    liquidGlassCard.style.transition = 'transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1)';
+    liquidGlassCard.style.transform = 'translate(0px, 0px) scale(1)';
+    setTimeout(() => {
+      liquidGlassCard.style.transition = '';
+    }, 450);
+  });
+
+  // 5. Viscous Apple Liquid Tab Bar with Surface Tension Physics
   function setupLiquidTabBar() {
     function moveToTab(targetIndex) {
       if (isTabAnimating && targetIndex === currentTabIndex) return;
@@ -112,15 +155,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const isMovingRight = destLeft > startLeft;
       const distance = Math.abs(destLeft - startLeft);
-
-      // Duration scales with speed setting
-      const baseDuration = (350 * (distance / (containerRect.width / 2) + 0.6)) / tabAnimationSpeed;
+      const baseDuration = (360 * (distance / (containerRect.width / 2) + 0.55)) / tabAnimationSpeed;
       const startTime = performance.now();
 
-      // Deactivate icons
       tabButtons.forEach((btn, i) => {
         const icon = btn.querySelector('.tab-icon');
-        const text = btn.querySelector('.tab-text');
         if (i === targetIndex) {
           btn.classList.add('text-white');
           btn.classList.remove('text-zinc-400');
@@ -136,31 +175,23 @@ document.addEventListener('DOMContentLoaded', () => {
         const elapsed = now - startTime;
         const progress = Math.min(1, elapsed / baseDuration);
 
-        // Apple Fluid Spring Curves: Leading edge accelerates faster than trailing edge
-        // Leading edge: fast cubic out
-        const leadingProgress = Math.min(1, Math.pow(progress, 0.7));
-        // Trailing edge: damped ease-in-out
-        const trailingProgress = Math.pow(progress, 1.45);
+        // Apple Fluid Curves: asymmetric velocity profile
+        const leadingProgress = Math.min(1, Math.pow(progress, 0.68));
+        const trailingProgress = Math.pow(progress, 1.48);
 
         let curLeft, curRight;
-
         if (isMovingRight) {
-          // Right edge stretches ahead rapidly
           curRight = (startLeft + startWidth) + ((destLeft + destWidth) - (startLeft + startWidth)) * leadingProgress;
-          // Left edge lags behind
           curLeft = startLeft + (destLeft - startLeft) * trailingProgress;
         } else {
-          // Left edge stretches ahead rapidly
           curLeft = startLeft + (destLeft - startLeft) * leadingProgress;
-          // Right edge lags behind
           curRight = (startLeft + startWidth) + ((destLeft + destWidth) - (startLeft + startWidth)) * trailingProgress;
         }
 
         const currentW = Math.max(destWidth * 0.9, curRight - curLeft);
-
-        // Liquid surface tension: elongation causes vertical thinning (squash)
+        // Liquid surface tension: elongation causes vertical thinning
         const stretchRatio = currentW / destWidth;
-        const scaleY = Math.max(0.82, Math.min(1.08, 1 - (stretchRatio - 1) * 0.35));
+        const scaleY = Math.max(0.80, Math.min(1.08, 1 - (stretchRatio - 1) * 0.38));
 
         liquidPill.style.left = `${curLeft}px`;
         liquidPill.style.width = `${currentW}px`;
@@ -169,7 +200,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (progress < 1) {
           requestAnimationFrame(animate);
         } else {
-          // Snap bounce settle
           liquidPill.style.left = `${destLeft}px`;
           liquidPill.style.width = `${destWidth}px`;
           liquidPill.style.transform = 'scaleY(1)';
@@ -180,7 +210,6 @@ document.addEventListener('DOMContentLoaded', () => {
       requestAnimationFrame(animate);
     }
 
-    // Set initial pill position
     function setInitialPill() {
       const containerRect = tabNavContainer.getBoundingClientRect();
       const firstTab = tabButtons[0];
@@ -195,7 +224,7 @@ document.addEventListener('DOMContentLoaded', () => {
       btn.addEventListener('click', () => moveToTab(idx));
     });
 
-    // Interactive Drag and Drop across the Liquid Tab Bar
+    // Touch & Mouse Dragging across tabs
     let isDraggingTab = false;
     let tabContainerRect = null;
 
@@ -219,29 +248,6 @@ document.addEventListener('DOMContentLoaded', () => {
       moveToTab(closestIdx);
     });
 
-    // Touch support for drag and drop
-    tabNavContainer.addEventListener('touchstart', (e) => {
-      isDraggingTab = true;
-      tabContainerRect = tabNavContainer.getBoundingClientRect();
-      if (e.touches[0]) handleTabDrag(e.touches[0]);
-    }, { passive: true });
-
-    window.addEventListener('touchmove', (e) => {
-      if (!isDraggingTab) return;
-      if (e.touches[0]) handleTabDrag(e.touches[0]);
-    }, { passive: true });
-
-    window.addEventListener('touchend', (e) => {
-      if (!isDraggingTab) return;
-      isDraggingTab = false;
-      if (e.changedTouches[0]) {
-        const relX = e.changedTouches[0].clientX - tabContainerRect.left;
-        const tabWidth = tabContainerRect.width / tabButtons.length;
-        const closestIdx = Math.max(0, Math.min(tabButtons.length - 1, Math.floor(relX / tabWidth)));
-        moveToTab(closestIdx);
-      }
-    });
-
     function handleTabDrag(pointer) {
       if (!tabContainerRect) return;
       const curX = pointer.clientX - tabContainerRect.left;
@@ -249,8 +255,8 @@ document.addEventListener('DOMContentLoaded', () => {
       const halfW = pillW / 2;
       const clampedCenter = Math.max(halfW, Math.min(tabContainerRect.width - halfW, curX));
       liquidPill.style.left = `${clampedCenter - halfW}px`;
-      liquidPill.style.width = `${pillW * 1.12}px`;
-      liquidPill.style.transform = `scaleY(0.85)`;
+      liquidPill.style.width = `${pillW * 1.15}px`;
+      liquidPill.style.transform = `scaleY(0.84)`;
     }
 
     setTimeout(setInitialPill, 50);
@@ -259,92 +265,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
   setupLiquidTabBar();
 
-  // Speed switchers for inspecting the liquid stretch
-  if (speedNormalBtn && speedSlowBtn) {
-    speedNormalBtn.addEventListener('click', () => {
-      tabAnimationSpeed = 1.0;
-      speedNormalBtn.className = 'px-3 py-1 rounded-lg bg-purple-600 text-white font-semibold text-xs transition';
-      speedSlowBtn.className = 'px-3 py-1 rounded-lg bg-white/10 text-zinc-300 text-xs hover:text-white transition';
-    });
-
-    speedSlowBtn.addEventListener('click', () => {
-      tabAnimationSpeed = 0.25;
-      speedSlowBtn.className = 'px-3 py-1 rounded-lg bg-purple-600 text-white font-semibold text-xs transition';
-      speedNormalBtn.className = 'px-3 py-1 rounded-lg bg-white/10 text-zinc-300 text-xs hover:text-white transition';
-    });
+  // 6. Interactive Control Center Glass Slider
+  function updateSlider(e) {
+    const rect = sliderTrack.getBoundingClientRect();
+    const x = Math.max(0, Math.min(rect.width, e.clientX - rect.left));
+    const pct = Math.round((x / rect.width) * 100);
+    sliderFill.style.width = `${pct}%`;
+    sliderValText.textContent = `${pct}%`;
   }
 
-  // 4. 3D Parallax Tilt & Drag-and-Drop for LiquidCard
-  let isCardDragging = false;
-  let cardDragStartX = 0;
-  let cardDragStartY = 0;
-  let cardOffsetX = 0;
-  let cardOffsetY = 0;
-
-  interactiveCard.addEventListener('mousedown', (e) => {
-    // Prevent drag if clicking nested controls
-    if (e.target.tagName.toLowerCase() === 'button' || e.target.closest('button')) return;
-    isCardDragging = true;
-    cardDragStartX = e.clientX - cardOffsetX;
-    cardDragStartY = e.clientY - cardOffsetY;
-    interactiveCard.style.cursor = 'grabbing';
+  sliderTrack.addEventListener('mousedown', (e) => {
+    isDraggingSlider = true;
+    updateSlider(e);
   });
 
   window.addEventListener('mousemove', (e) => {
-    if (isCardDragging) {
-      cardOffsetX = (e.clientX - cardDragStartX) * 0.4; // rubber-band elastic resistance
-      cardOffsetY = (e.clientY - cardDragStartY) * 0.4;
-      interactiveCard.style.transform = `translate(${cardOffsetX}px, ${cardOffsetY}px) scale(0.985)`;
-      return;
-    }
-
-    // Normal 3D Parallax Tilt on Hover
-    if (!isTiltEnabled) return;
-    const rect = interactiveCard.getBoundingClientRect();
-    if (
-      e.clientX < rect.left ||
-      e.clientX > rect.right ||
-      e.clientY < rect.top ||
-      e.clientY > rect.bottom
-    ) return;
-
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    const centerX = rect.width / 2;
-    const centerY = rect.height / 2;
-    const rotateX = ((y - centerY) / centerY) * -9;
-    const rotateY = ((x - centerX) / centerX) * 9;
-
-    interactiveCard.style.transform = `perspective(900px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(0.985)`;
+    if (!isDraggingSlider) return;
+    updateSlider(e);
   });
 
   window.addEventListener('mouseup', () => {
-    if (!isCardDragging) return;
-    isCardDragging = false;
-    interactiveCard.style.cursor = 'grab';
-    cardOffsetX = 0;
-    cardOffsetY = 0;
-    // Apple Spring Snap Back to Origin
-    interactiveCard.style.transition = 'transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1)';
-    interactiveCard.style.transform = 'translate(0px, 0px) scale(1)';
-    setTimeout(() => {
-      interactiveCard.style.transition = '';
-    }, 450);
+    isDraggingSlider = false;
   });
 
-  interactiveCard.addEventListener('mouseleave', () => {
-    interactiveCard.style.transform = 'perspective(900px) rotateX(0deg) rotateY(0deg) scale(1)';
-  });
-
-  tiltToggle.addEventListener('change', (e) => {
-    isTiltEnabled = e.target.checked;
-    if (!isTiltEnabled) {
-      interactiveCard.style.transform = 'none';
-    }
-    updateLiveCode();
-  });
-
-  // 5. Tactile LiquidButton (Ripple Origin from coordinates)
+  // 7. Tactile LiquidButton (Ripple Origin from coordinates)
   interactiveBtn.addEventListener('click', (e) => {
     const rect = interactiveBtn.getBoundingClientRect();
     const x = e.clientX - rect.left;
@@ -359,10 +303,10 @@ document.addEventListener('DOMContentLoaded', () => {
     ripple.style.top = `${y - size / 2}px`;
 
     rippleLayer.appendChild(ripple);
-    setTimeout(() => ripple.remove(), 700);
+    setTimeout(() => ripple.remove(), 650);
   });
 
-  // 6. Music Play/Pause toggle
+  // 8. Music Play/Pause toggle
   let isPlaying = false;
   simPlayBtn.addEventListener('click', (e) => {
     e.stopPropagation();
@@ -370,66 +314,26 @@ document.addEventListener('DOMContentLoaded', () => {
     simPlayBtn.textContent = isPlaying ? '⏸' : '▶';
   });
 
-  // 7. Floating Action Button (FAB)
-  mainFabBtn.addEventListener('click', () => {
-    isFabOpen = !isFabOpen;
-    if (isFabOpen) {
-      fabIcon.style.transform = 'rotate(135deg)';
-      fabActions.classList.remove('opacity-0', 'scale-75', 'pointer-events-none');
-      fabActions.classList.add('opacity-100', 'scale-100', 'pointer-events-auto');
-    } else {
-      fabIcon.style.transform = 'rotate(0deg)';
-      fabActions.classList.add('opacity-0', 'scale-75', 'pointer-events-none');
-      fabActions.classList.remove('opacity-100', 'scale-100', 'pointer-events-auto');
-    }
-  });
-
-  // 8. Scroll-Linked Navbar
+  // 9. Scroll-Linked Navbar
   simScrollArea.addEventListener('scroll', () => {
     const scrollY = simScrollArea.scrollTop;
     const maxOffset = 60;
     const opacity = Math.min(1, scrollY / maxOffset);
-    const blur = 10 + opacity * 20;
+    const blur = 14 + opacity * 24;
     previewNavbar.style.backgroundColor = isSimulatorDark
       ? `rgba(18, 18, 22, ${0.25 + opacity * 0.65})`
-      : `rgba(255, 255, 255, ${0.3 + opacity * 0.55})`;
-    previewNavbar.style.backdropFilter = `blur(${blur}px)`;
+      : `rgba(255, 255, 255, ${0.4 + opacity * 0.5})`;
+    previewNavbar.style.backdropFilter = `blur(${blur}px) saturate(190%)`;
   });
 
-  // 9. Modal Overlays
-  openModalBtn.addEventListener('click', () => {
-    previewModal.classList.remove('opacity-0', 'pointer-events-none');
-    previewModal.classList.add('opacity-100', 'pointer-events-auto');
-    modalCard.classList.remove('scale-90');
-    modalCard.classList.add('scale-100');
-  });
-
-  closeModalBtn.addEventListener('click', () => {
-    modalCard.classList.remove('scale-100');
-    modalCard.classList.add('scale-90');
-    previewModal.classList.remove('opacity-100', 'pointer-events-auto');
-    previewModal.classList.add('opacity-0', 'pointer-events-none');
-  });
-
-  // 10. Bottom Sheet Overlays
-  openSheetBtn.addEventListener('click', () => {
-    previewSheet.classList.remove('translate-y-full');
-    previewSheet.classList.add('translate-y-0');
-  });
-
-  closeSheetBtn.addEventListener('click', () => {
-    previewSheet.classList.remove('translate-y-0');
-    previewSheet.classList.add('translate-y-full');
-  });
-
-  // 11. Blur Intensity Slider & Live Code Generator
+  // 10. Blur Intensity Slider & Live Code Generator
   blurSlider.addEventListener('input', (e) => {
     currentBlur = e.target.value;
     blurVal.textContent = `${currentBlur}%`;
 
-    document.querySelectorAll('.apple-glass, .liquid-tab-capsule').forEach((el) => {
-      el.style.backdropFilter = `blur(${Math.max(6, currentBlur * 0.45)}px) saturate(190%)`;
-      el.style.webkitBackdropFilter = `blur(${Math.max(6, currentBlur * 0.45)}px) saturate(190%)`;
+    document.querySelectorAll('.liquid-glass-card, .viscous-tab-capsule, .ios-glass-slider-track').forEach((el) => {
+      el.style.backdropFilter = `blur(${Math.max(8, currentBlur * 0.55)}px) saturate(220%)`;
+      el.style.webkitBackdropFilter = `blur(${Math.max(8, currentBlur * 0.55)}px) saturate(220%)`;
     });
     updateLiveCode();
   });
@@ -437,9 +341,9 @@ document.addEventListener('DOMContentLoaded', () => {
   // Glow Toggle
   glowToggle.addEventListener('change', (e) => {
     isGlowEnabled = e.target.checked;
-    interactiveCard.style.boxShadow = isGlowEnabled
-      ? '0 0 28px rgba(191, 90, 242, 0.45), 0 20px 48px -12px rgba(0, 0, 0, 0.65)'
-      : '0 20px 48px -12px rgba(0, 0, 0, 0.65)';
+    liquidGlassCard.style.boxShadow = isGlowEnabled
+      ? '0 0 32px rgba(10, 132, 255, 0.35), 0 20px 48px -8px rgba(0, 0, 0, 0.6)'
+      : '0 20px 48px -8px rgba(0, 0, 0, 0.6)';
     updateLiveCode();
   });
 
@@ -449,7 +353,8 @@ document.addEventListener('DOMContentLoaded', () => {
   intensity={${currentBlur}}
   interactive={true}
   shadowDepth="medium"
-  borderRadius={28}
+  borderGlow={${isGlowEnabled}}
+  borderRadius={30}
 >
   <Text style={styles.title}>Midnight Refraction</Text>
   <LiquidButton
@@ -460,7 +365,7 @@ document.addEventListener('DOMContentLoaded', () => {
 </LiquidCard>`;
   }
 
-  // 12. Copy Install and Code Buttons
+  // 11. Copy Install and Code Buttons
   copyInstallBtn.addEventListener('click', () => {
     const cmd = 'npx expo install liquidglass-rn @shopify/react-native-skia expo-blur react-native-reanimated react-native-gesture-handler react-native-svg lucide-react-native';
     navigator.clipboard.writeText(cmd).then(() => {
