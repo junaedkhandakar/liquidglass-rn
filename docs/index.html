@@ -122,9 +122,14 @@
             <div class="relative z-20 flex-1 overflow-y-auto px-4 py-4 space-y-4 no-scrollbar" id="sim-scroll-area">
               
               <!-- 1. Interactive LiquidCard (3D Parallax Tilt & Specular Shine) -->
-              <div id="interactive-card" class="apple-glass liquid-card-3d group relative p-5 rounded-3xl cursor-pointer select-none">
+              <div id="interactive-card" class="apple-glass liquid-card-3d group relative p-5 rounded-3xl cursor-grab select-none">
                 <!-- Specular Sweep Highlight -->
                 <div class="specular-layer"></div>
+
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-[9px] uppercase font-mono font-bold text-purple-400 tracking-wider">Drag to Move · Hover to Tilt</span>
+                  <span class="text-[9px] text-zinc-400 font-mono">VisionOS</span>
+                </div>
                 
                 <div class="flex items-center gap-3.5 mb-3.5">
                   <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-rose-500 to-purple-600 flex items-center justify-center shadow-lg shadow-purple-600/30 text-white font-bold text-base">

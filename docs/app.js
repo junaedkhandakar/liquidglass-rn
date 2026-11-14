@@ -195,6 +195,64 @@ document.addEventListener('DOMContentLoaded', () => {
       btn.addEventListener('click', () => moveToTab(idx));
     });
 
+    // Interactive Drag and Drop across the Liquid Tab Bar
+    let isDraggingTab = false;
+    let tabContainerRect = null;
+
+    tabNavContainer.addEventListener('mousedown', (e) => {
+      isDraggingTab = true;
+      tabContainerRect = tabNavContainer.getBoundingClientRect();
+      handleTabDrag(e);
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (!isDraggingTab) return;
+      handleTabDrag(e);
+    });
+
+    window.addEventListener('mouseup', (e) => {
+      if (!isDraggingTab) return;
+      isDraggingTab = false;
+      const relX = e.clientX - tabContainerRect.left;
+      const tabWidth = tabContainerRect.width / tabButtons.length;
+      const closestIdx = Math.max(0, Math.min(tabButtons.length - 1, Math.floor(relX / tabWidth)));
+      moveToTab(closestIdx);
+    });
+
+    // Touch support for drag and drop
+    tabNavContainer.addEventListener('touchstart', (e) => {
+      isDraggingTab = true;
+      tabContainerRect = tabNavContainer.getBoundingClientRect();
+      if (e.touches[0]) handleTabDrag(e.touches[0]);
+    }, { passive: true });
+
+    window.addEventListener('touchmove', (e) => {
+      if (!isDraggingTab) return;
+      if (e.touches[0]) handleTabDrag(e.touches[0]);
+    }, { passive: true });
+
+    window.addEventListener('touchend', (e) => {
+      if (!isDraggingTab) return;
+      isDraggingTab = false;
+      if (e.changedTouches[0]) {
+        const relX = e.changedTouches[0].clientX - tabContainerRect.left;
+        const tabWidth = tabContainerRect.width / tabButtons.length;
+        const closestIdx = Math.max(0, Math.min(tabButtons.length - 1, Math.floor(relX / tabWidth)));
+        moveToTab(closestIdx);
+      }
+    });
+
+    function handleTabDrag(pointer) {
+      if (!tabContainerRect) return;
+      const curX = pointer.clientX - tabContainerRect.left;
+      const pillW = tabContainerRect.width / tabButtons.length;
+      const halfW = pillW / 2;
+      const clampedCenter = Math.max(halfW, Math.min(tabContainerRect.width - halfW, curX));
+      liquidPill.style.left = `${clampedCenter - halfW}px`;
+      liquidPill.style.width = `${pillW * 1.12}px`;
+      liquidPill.style.transform = `scaleY(0.85)`;
+    }
+
     setTimeout(setInitialPill, 50);
     window.addEventListener('resize', setInitialPill);
   }
@@ -216,10 +274,40 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // 4. 3D Parallax Tilt for LiquidCard
-  interactiveCard.addEventListener('mousemove', (e) => {
+  // 4. 3D Parallax Tilt & Drag-and-Drop for LiquidCard
+  let isCardDragging = false;
+  let cardDragStartX = 0;
+  let cardDragStartY = 0;
+  let cardOffsetX = 0;
+  let cardOffsetY = 0;
+
+  interactiveCard.addEventListener('mousedown', (e) => {
+    // Prevent drag if clicking nested controls
+    if (e.target.tagName.toLowerCase() === 'button' || e.target.closest('button')) return;
+    isCardDragging = true;
+    cardDragStartX = e.clientX - cardOffsetX;
+    cardDragStartY = e.clientY - cardOffsetY;
+    interactiveCard.style.cursor = 'grabbing';
+  });
+
+  window.addEventListener('mousemove', (e) => {
+    if (isCardDragging) {
+      cardOffsetX = (e.clientX - cardDragStartX) * 0.4; // rubber-band elastic resistance
+      cardOffsetY = (e.clientY - cardDragStartY) * 0.4;
+      interactiveCard.style.transform = `translate(${cardOffsetX}px, ${cardOffsetY}px) scale(0.985)`;
+      return;
+    }
+
+    // Normal 3D Parallax Tilt on Hover
     if (!isTiltEnabled) return;
     const rect = interactiveCard.getBoundingClientRect();
+    if (
+      e.clientX < rect.left ||
+      e.clientX > rect.right ||
+      e.clientY < rect.top ||
+      e.clientY > rect.bottom
+    ) return;
+
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
     const centerX = rect.width / 2;
@@ -228,6 +316,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const rotateY = ((x - centerX) / centerX) * 9;
 
     interactiveCard.style.transform = `perspective(900px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(0.985)`;
+  });
+
+  window.addEventListener('mouseup', () => {
+    if (!isCardDragging) return;
+    isCardDragging = false;
+    interactiveCard.style.cursor = 'grab';
+    cardOffsetX = 0;
+    cardOffsetY = 0;
+    // Apple Spring Snap Back to Origin
+    interactiveCard.style.transition = 'transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1)';
+    interactiveCard.style.transform = 'translate(0px, 0px) scale(1)';
+    setTimeout(() => {
+      interactiveCard.style.transition = '';
+    }, 450);
   });
 
   interactiveCard.addEventListener('mouseleave', () => {

@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, Text, Pressable, LayoutChangeEvent } from 'react-native';
+import { GestureDetector, Gesture } from 'react-native-gesture-handler';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withSpring,
-  useDerivedValue,
+  runOnJS,
 } from 'react-native-reanimated';
 import { LiquidView } from './LiquidView';
 import { useTheme } from '../hooks/useTheme';
@@ -54,9 +55,10 @@ export const LiquidTabBar: React.FC<LiquidTabBarProps> = ({
   const indicatorLeft = useSharedValue(0);
   const indicatorRight = useSharedValue(0);
   const activeTabWidth = useSharedValue(80);
+  const isDragging = useSharedValue(false);
 
   useEffect(() => {
-    if (tabLayouts.length === routes.length && tabLayouts[activeIndex]) {
+    if (!isDragging.value && tabLayouts.length === routes.length && tabLayouts[activeIndex]) {
       const activeLayout = tabLayouts[activeIndex];
       activeTabWidth.value = activeLayout.width;
       const targetLeft = activeLayout.x;
@@ -92,6 +94,29 @@ export const LiquidTabBar: React.FC<LiquidTabBarProps> = ({
       return updated;
     });
   };
+
+  // Interactive drag-and-drop gesture across the tab bar
+  const panGesture = Gesture.Pan()
+    .onStart(() => {
+      isDragging.value = true;
+    })
+    .onUpdate((e) => {
+      const curX = e.x;
+      const pillHalfWidth = (activeTabWidth.value || 60) / 2;
+      const stretch = Math.min(22, Math.abs(e.velocityX) * 0.015);
+      indicatorLeft.value = curX - pillHalfWidth - (e.velocityX > 0 ? 0 : stretch);
+      indicatorRight.value = curX + pillHalfWidth + (e.velocityX > 0 ? stretch : 0);
+    })
+    .onEnd((e) => {
+      isDragging.value = false;
+      const endX = e.x;
+      const count = routes.length;
+      if (barWidth > 0 && count > 0) {
+        const tabSlotWidth = barWidth / count;
+        const nearestIndex = Math.max(0, Math.min(count - 1, Math.floor(endX / tabSlotWidth)));
+        runOnJS(onChange)(nearestIndex);
+      }
+    });
 
   // Liquid Bubble indicator styling
   const indicatorStyle = useAnimatedStyle(() => {
@@ -129,19 +154,23 @@ export const LiquidTabBar: React.FC<LiquidTabBarProps> = ({
         style={styles.floatingBar}
         onLayout={handleBarLayout}
       >
-        <View style={layoutStyles.row}>
-          {/* Asymmetric Liquid Stretching Indicator Bubble */}
-          {tabLayouts.length === routes.length && (
-            <Animated.View
-              style={[
-                styles.liquidBlob,
-                { backgroundColor: theme.isDark ? 'rgba(255, 255, 255, 0.12)' : 'rgba(0, 0, 0, 0.06)' },
-                indicatorStyle,
-              ]}
-            />
-          )}
+        <GestureDetector gesture={panGesture}>
+          <View style={layoutStyles.row}>
+            {/* Asymmetric Liquid Stretching Indicator Bubble */}
+            {tabLayouts.length === routes.length && (
+              <Animated.View
+                style={[
+                  styles.liquidBlob,
+                  {
+                    backgroundColor: theme.isDark ? 'rgba(255, 255, 255, 0.18)' : 'rgba(255, 255, 255, 0.75)',
+                    borderColor: theme.isDark ? 'rgba(255, 255, 255, 0.3)' : 'rgba(255, 255, 255, 0.95)',
+                  },
+                  indicatorStyle,
+                ]}
+              />
+            )}
 
-          {/* Render Tabs */}
+            {/* Render Tabs */}
           {routes.map((route, index) => {
             const isActive = index === activeIndex;
             // Dynamically resolve Icon component from Lucide name
@@ -173,7 +202,8 @@ export const LiquidTabBar: React.FC<LiquidTabBarProps> = ({
               </Pressable>
             );
           })}
-        </View>
+          </View>
+        </GestureDetector>
       </LiquidView>
     </View>
   );
@@ -208,9 +238,10 @@ const styles = StyleSheet.create({
   },
   liquidBlob: {
     position: 'absolute',
-    height: '92%',
-    top: '4%',
+    height: '90%',
+    top: '5%',
     borderRadius: 22,
     zIndex: 1,
+    borderWidth: 1,
   },
 });
