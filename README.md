@@ -11,9 +11,15 @@ Apple-style liquid glass UI components for React Native and Expo. Built with nat
 
 ---
 
+## Platform Support
+
+- iOS: Hardware-accelerated frosted glass via native UIVisualEffectView.
+- Android: Hardware-accelerated blur via dimezisBlurView, edge-to-edge status bar insets, Android back button dismissal for sheets/modals, and tuned soft shadows.
+- Both: Skia GPU AGSL runtime shaders with optical chromatic dispersion.
+
 ## Requirements
 
-- Expo SDK 54+ or React Native 0.81+
+- Expo SDK 54+ or React Native 0.81+ (iOS & Android)
 - React 19
 - React Native Reanimated v3+
 - Expo Dev Client (only if using `experimentalSkia={true}`)

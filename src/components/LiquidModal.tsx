@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, Modal, View, Pressable, TouchableWithoutFeedback, Dimensions } from 'react-native';
+import { StyleSheet, Modal, View, Pressable, TouchableWithoutFeedback, Dimensions, Platform } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -87,6 +87,7 @@ export const LiquidModal: React.FC<LiquidModalProps> = ({
       visible={showModal}
       animationType="none"
       onRequestClose={handleClose}
+      statusBarTranslucent={true}
     >
       <View style={[layoutStyles.center, styles.overlay]}>
         
@@ -96,6 +97,7 @@ export const LiquidModal: React.FC<LiquidModalProps> = ({
             <BlurView
               intensity={45}
               tint={isDark ? 'dark' : 'light'}
+              experimentalBlurMethod={Platform.OS === 'android' ? 'dimezisBlurView' : undefined}
               style={StyleSheet.absoluteFill}
             />
           ) : (

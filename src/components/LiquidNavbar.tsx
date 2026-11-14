@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, View, Text, StatusBar, SafeAreaView, ViewStyle, TextStyle } from 'react-native';
+import { StyleSheet, View, Text, StatusBar, SafeAreaView, ViewStyle, TextStyle, Platform } from 'react-native';
 import Animated, {
   useAnimatedStyle,
   useDerivedValue,
@@ -83,8 +83,12 @@ export const LiquidNavbar: React.FC<LiquidNavbarProps> = ({
         style,
       ]}
     >
-      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
-      <SafeAreaView style={styles.safeArea}>
+      <StatusBar
+        barStyle={isDark ? 'light-content' : 'dark-content'}
+        translucent
+        backgroundColor="transparent"
+      />
+      <SafeAreaView style={[styles.safeArea, Platform.OS === 'android' && { paddingTop: StatusBar.currentHeight || 0 }]}>
         <AnimatedLiquidView
           intensity={animatedIntensity as any}
           tint={isDark ? 'dark' : 'light'}

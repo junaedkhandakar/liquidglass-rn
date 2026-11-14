@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, ViewProps, LayoutChangeEvent } from 'react-native';
+import { StyleSheet, View, ViewProps, LayoutChangeEvent, Platform } from 'react-native';
 import { BlurView } from 'expo-blur';
 import {
   Canvas,
@@ -171,10 +171,11 @@ export const LiquidView: React.FC<LiquidViewProps> = ({
             </Fill>
           </Canvas>
         ) : (
-          // Fast native blurring pipeline
+          // Fast native blurring pipeline with Android hardware blur support
           <AnimatedBlurView
             animatedProps={animatedBlurProps}
             tint={tintProps.blurTint}
+            experimentalBlurMethod={Platform.OS === 'android' ? 'dimezisBlurView' : undefined}
             style={layoutStyles.absoluteFill}
           />
         )}

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, View, Dimensions, Pressable } from 'react-native';
+import { StyleSheet, View, Dimensions, Pressable, BackHandler, Platform } from 'react-native';
 import { GestureDetector, Gesture } from 'react-native-gesture-handler';
 import Animated, {
   useSharedValue,
@@ -55,6 +55,16 @@ export const LiquidSheet: React.FC<LiquidSheetProps> = ({
       return () => clearTimeout(timer);
     }
   }, [isOpen, height]);
+
+  // Android hardware back press support
+  useEffect(() => {
+    if (!isOpen || Platform.OS !== 'android') return;
+    const backSub = BackHandler.addEventListener('hardwareBackPress', () => {
+      handleClose();
+      return true;
+    });
+    return () => backSub.remove();
+  }, [isOpen]);
 
   const handleClose = () => {
     translateY.value = withSpring(height, APPLE_SPRING_CONFIG);
