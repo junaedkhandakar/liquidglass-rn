@@ -2,6 +2,8 @@
 
 Apple-style liquid glass UI components for React Native and Expo. Built with native blur, Skia GPU shaders, and Reanimated 3 physics.
 
+[Live Demo & Interactive Simulator](https://junaedkhandakar.github.io/liquidglass-rn/)
+
 [![npm version](https://img.shields.io/npm/v/liquidglass-rn.svg?style=flat-square)](https://www.npmjs.com/package/liquidglass-rn)
 [![npm downloads](https://img.shields.io/npm/dm/liquidglass-rn.svg?style=flat-square)](https://www.npmjs.com/package/liquidglass-rn)
 [![total downloads](https://img.shields.io/npm/dt/liquidglass-rn.svg?style=flat-square)](https://www.npmjs.com/package/liquidglass-rn)

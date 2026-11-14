@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>liquidglass-rn | Apple-Style Liquid Glass UI for React Native & Expo</title>
+  <meta name="description" content="High-performance, VisionOS and iOS-inspired Liquid Glass UI elements for React Native and Expo. Real-time blur, Skia GPU shaders, and Reanimated 3 physics.">
+  <link rel="icon" type="image/png" href="../assets/favicon.png">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="styles.css">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            obsidian: '#0B0B0E',
+            obsidianSurface: 'rgba(20, 20, 25, 0.65)',
+            iosLight: '#EAEBF0',
+            iosLightSurface: 'rgba(255, 255, 255, 0.55)',
+            appleBlue: '#007AFF',
+            applePurple: '#BF5AF2',
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-obsidian text-zinc-100 min-h-screen transition-colors duration-300 font-sans selection:bg-purple-500/30 overflow-x-hidden">
+
+  <!-- Ambient Background Orbs -->
+  <div class="fixed inset-0 pointer-events-none overflow-hidden z-0">
+    <div id="orb-cyan" class="absolute w-[450px] h-[450px] rounded-full bg-cyan-500/20 blur-[120px] top-[10%] -left-[10%] transition-transform duration-1000 ease-out"></div>
+    <div id="orb-purple" class="absolute w-[500px] h-[500px] rounded-full bg-purple-600/20 blur-[140px] bottom-[20%] -right-[10%] transition-transform duration-1000 ease-out"></div>
+    <div id="orb-pink" class="absolute w-[350px] h-[350px] rounded-full bg-pink-500/15 blur-[100px] top-[50%] left-[40%] transition-transform duration-1000 ease-out"></div>
+  </div>
+
+  <!-- SVG Filter for Organic Metaball Fusion (Skia LIQUID_FUSION_COLOR_MATRIX equivalent for web preview) -->
+  <svg class="hidden" aria-hidden="true">
+    <defs>
+      <filter id="liquid-fusion">
+        <feGaussianBlur in="SourceGraphic" stdDeviation="12" result="blur" />
+        <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 24 -12" result="fusion" />
+        <feComposite in="SourceGraphic" in2="fusion" operator="atop" />
+      </filter>
+    </defs>
+  </svg>
+
+  <!-- Sticky Glass Navigation Header -->
+  <header class="sticky top-0 z-50 backdrop-blur-xl bg-obsidian/70 border-b border-white/10 transition-colors duration-300">
+    <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-purple-600 to-cyan-400 p-[1px] shadow-lg shadow-purple-500/20">
+          <div class="w-full h-full bg-obsidian rounded-[11px] flex items-center justify-center font-bold text-xs tracking-wider text-purple-300">LG</div>
+        </div>
+        <span class="font-bold text-lg tracking-tight">liquidglass-rn</span>
+        <span class="px-2 py-0.5 text-xs font-semibold rounded-full bg-purple-500/15 text-purple-400 border border-purple-500/30">v1.0.4</span>
+      </div>
+
+      <nav class="hidden md:flex items-center gap-8 text-sm font-medium text-zinc-300">
+        <a href="#simulator" class="hover:text-white transition">Simulator</a>
+        <a href="#components" class="hover:text-white transition">Components</a>
+        <a href="#playground" class="hover:text-white transition">Playground</a>
+        <a href="#installation" class="hover:text-white transition">Installation</a>
+      </nav>
+
+      <div class="flex items-center gap-3">
+        <!-- Theme Toggle -->
+        <button id="theme-toggle" class="p-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition active:scale-95" title="Toggle Light/Dark Theme">
+          <svg id="moon-icon" class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+          <svg id="sun-icon" class="w-5 h-5 text-amber-400 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 9h-1m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+        </button>
+
+        <!-- npm Link -->
+        <a href="https://www.npmjs.com/package/liquidglass-rn" target="_blank" rel="noopener noreferrer" class="px-3.5 py-1.5 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-semibold hover:bg-red-500/20 transition flex items-center gap-1.5">
+          <span>npm</span>
+          <span class="text-zinc-400 font-normal">1.0.4</span>
+        </a>
+
+        <!-- GitHub Repo -->
+        <a href="https://github.com/junaedkhandakar/liquidglass-rn" target="_blank" rel="noopener noreferrer" class="px-4 py-1.5 rounded-xl bg-white/10 hover:bg-white/15 border border-white/15 text-xs font-semibold transition active:scale-95 flex items-center gap-2">
+          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"></path></svg>
+          GitHub
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="relative z-10 max-w-7xl mx-auto px-6 pt-16 pb-12 text-center">
+    <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs text-purple-300 font-medium mb-6 backdrop-blur-md">
+      <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+      Expo SDK 54+ & React Native 0.81+ Compatible
+    </div>
+
+    <h1 class="text-4xl md:text-6xl lg:text-7xl font-extrabold tracking-tight max-w-4xl mx-auto leading-tight">
+      Apple-Style <span class="bg-clip-text text-transparent bg-gradient-to-r from-purple-400 via-pink-400 to-cyan-400">Liquid Glass</span> for React Native
+    </h1>
+
+    <p class="mt-6 text-lg md:text-xl text-zinc-400 max-w-2xl mx-auto leading-relaxed">
+      Recreate VisionOS translucent materials, 3D parallax tilt, dynamic specular sweeps, and Skia metaballs running at guaranteed 60/120 FPS.
+    </p>
+
+    <!-- Quick Install Command -->
+    <div class="mt-8 flex justify-center">
+      <div class="inline-flex items-center gap-3 px-5 py-3 rounded-2xl bg-black/40 border border-white/15 backdrop-blur-xl shadow-2xl max-w-xl w-full justify-between">
+        <code class="text-sm font-mono text-cyan-300 truncate text-left">
+          npx expo install liquidglass-rn @shopify/react-native-skia expo-blur react-native-reanimated react-native-gesture-handler react-native-svg
+        </code>
+        <button id="copy-install-btn" class="px-3 py-1.5 bg-white/10 hover:bg-white/20 active:scale-95 text-xs font-semibold rounded-lg transition whitespace-nowrap text-zinc-200">
+          Copy
+        </button>
+      </div>
+    </div>
+
+    <div class="mt-8 flex items-center justify-center gap-4 text-xs text-zinc-400 font-medium">
+      <span class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-purple-400"></span>590+ Downloads</span>
+      <span>•</span>
+      <span class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-cyan-400"></span>MIT License</span>
+      <span>•</span>
+      <span class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-pink-400"></span>Zero JS Jank</span>
+    </div>
+  </section>
+
+  <!-- Interactive Simulator & Live Canvas -->
+  <section id="simulator" class="relative z-10 max-w-7xl mx-auto px-6 py-8">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      
+      <!-- Left: Interactive Mobile Device Canvas -->
+      <div class="lg:col-span-7 flex justify-center">
+        <div class="relative w-full max-w-[400px] h-[720px] rounded-[48px] p-3.5 bg-zinc-950/80 border-[4px] border-zinc-700/60 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.7)] backdrop-blur-3xl overflow-hidden flex flex-col justify-between">
+          
+          <!-- Phone Notch / Dynamic Island -->
+          <div class="absolute top-4 left-1/2 -translate-x-1/2 w-28 h-5 bg-black rounded-full z-40 flex items-center justify-end px-3">
+            <span class="w-2.5 h-2.5 rounded-full bg-zinc-900 border border-zinc-800"></span>
+          </div>
+
+          <!-- Phone Inner Screen Container -->
+          <div id="phone-screen" class="relative w-full h-full rounded-[38px] overflow-hidden flex flex-col justify-between bg-[#0B0B0E] transition-colors duration-300">
+            
+            <!-- Dynamic Background Blobs inside Simulator -->
+            <div class="absolute inset-0 pointer-events-none overflow-hidden">
+              <div class="absolute w-48 h-48 rounded-full bg-pink-500/30 blur-[50px] -top-10 -right-10 animate-pulse"></div>
+              <div class="absolute w-56 h-56 rounded-full bg-purple-600/30 blur-[60px] top-[40%] -left-10 animate-pulse" style="animation-delay: 2s;"></div>
+              <div class="absolute w-44 h-44 rounded-full bg-cyan-400/25 blur-[45px] -bottom-10 right-4 animate-pulse" style="animation-delay: 4s;"></div>
+            </div>
+
+            <!-- Scroll-linked Navbar Component Preview -->
+            <div id="preview-navbar" class="relative z-30 pt-8 pb-3 px-5 transition-all duration-300 border-b border-white/10 bg-white/5 backdrop-blur-md flex items-center justify-between">
+              <span class="text-xs font-bold tracking-tight text-white flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-purple-400"></span>
+                LiquidRN
+              </span>
+              <span class="text-xs font-semibold text-zinc-300">Widgets</span>
+              <button id="sim-theme-toggle" class="p-1 rounded-lg bg-white/10 text-[10px] text-zinc-200 hover:bg-white/20 transition">Mode</button>
+            </div>
+
+            <!-- Phone Scrollable Content Area -->
+            <div class="relative z-20 flex-1 overflow-y-auto px-4 py-4 space-y-4 scrollbar-none" id="sim-scroll-area">
+              
+              <!-- 1. Interactive LiquidCard (3D Tilt & Specular Shine) -->
+              <div id="interactive-card" class="glass-surface liquid-card group relative p-5 rounded-3xl transition-transform duration-150 ease-out cursor-pointer select-none">
+                <!-- Specular Sweep Highlight -->
+                <div class="specular-sweep"></div>
+                
+                <div class="flex items-center gap-3.5 mb-3">
+                  <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-pink-500 to-rose-400 flex items-center justify-center shadow-lg shadow-pink-500/30 text-white font-bold text-lg">
+                    ♫
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <p class="text-sm font-bold truncate text-white">Midnight Refraction</p>
+                    <p class="text-[11px] text-zinc-400 truncate">LiquidRN Skia Engine</p>
+                  </div>
+                </div>
+
+                <!-- Progress Track -->
+                <div class="w-full h-1.5 bg-white/10 rounded-full overflow-hidden mb-2">
+                  <div class="w-2/5 h-full bg-purple-500 rounded-full"></div>
+                </div>
+                <div class="flex justify-between text-[10px] text-zinc-400 font-mono mb-4">
+                  <span>1:24</span>
+                  <span>3:45</span>
+                </div>
+
+                <!-- Card Action Controls -->
+                <div class="flex items-center justify-center gap-3">
+                  <button class="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center text-xs active:scale-90 transition">⏮</button>
+                  <button id="sim-play-btn" class="w-12 h-12 rounded-full bg-purple-600 hover:bg-purple-500 text-white flex items-center justify-center text-base shadow-lg shadow-purple-600/40 active:scale-95 transition">▶</button>
+                  <button class="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center text-xs active:scale-90 transition">⏭</button>
+                </div>
+              </div>
+
+              <!-- 2. Tactile LiquidButton (Liquid Ripple) -->
+              <div class="space-y-2">
+                <p class="text-[11px] uppercase tracking-wider font-bold text-zinc-400 px-1">Tactile Button (Click to ripple)</p>
+                <button id="interactive-btn" class="liquid-button relative w-full py-3.5 px-6 rounded-2xl bg-purple-600/80 hover:bg-purple-600 text-white font-semibold text-xs tracking-wide shadow-lg shadow-purple-600/25 border border-white/20 overflow-hidden active:scale-95 transition-all">
+                  <span class="relative z-10 flex items-center justify-center gap-2">
+                    <span>Tap Liquid Ripple</span>
+                    <span class="text-purple-200">✦</span>
+                  </span>
+                  <!-- Ripple Container -->
+                  <div class="ripple-layer absolute inset-0 pointer-events-none"></div>
+                </button>
+              </div>
+
+              <!-- 3. Overlays Trigger Card -->
+              <div class="glass-surface p-4 rounded-3xl space-y-2.5">
+                <p class="text-xs font-bold text-white">Glass Overlays</p>
+                <div class="grid grid-cols-2 gap-2">
+                  <button id="open-modal-btn" class="py-2.5 px-3 rounded-xl bg-white/10 hover:bg-white/15 text-[11px] font-semibold text-zinc-200 active:scale-95 transition border border-white/10">
+                    Open Modal
+                  </button>
+                  <button id="open-sheet-btn" class="py-2.5 px-3 rounded-xl bg-white/10 hover:bg-white/15 text-[11px] font-semibold text-zinc-200 active:scale-95 transition border border-white/10">
+                    Open Sheet
+                  </button>
+                </div>
+              </div>
+
+              <div class="h-16"></div> <!-- Spacer for floating bar -->
+            </div>
+
+            <!-- 4. Interactive Floating LiquidFAB (Metaballs) -->
+            <div id="sim-fab-container" class="absolute bottom-20 right-4 z-40 flex flex-col items-center">
+              <!-- Expandable Action Items (Connected via SVG metaball filter) -->
+              <div id="fab-actions" class="flex flex-col items-center gap-3 mb-3 pointer-events-none opacity-0 scale-75 transition-all duration-300 origin-bottom">
+                <button class="fab-sub-btn w-10 h-10 rounded-full bg-purple-600 text-white text-xs flex items-center justify-center shadow-lg active:scale-90 transition pointer-events-auto" title="Camera">📷</button>
+                <button class="fab-sub-btn w-10 h-10 rounded-full bg-purple-600 text-white text-xs flex items-center justify-center shadow-lg active:scale-90 transition pointer-events-auto" title="Image">🖼️</button>
+                <button class="fab-sub-btn w-10 h-10 rounded-full bg-purple-600 text-white text-xs flex items-center justify-center shadow-lg active:scale-90 transition pointer-events-auto" title="Settings">⚙️</button>
+              </div>
+
+              <!-- Main Floating Action Trigger -->
+              <button id="main-fab-btn" class="w-14 h-14 rounded-full bg-purple-600 hover:bg-purple-500 text-white font-bold text-2xl flex items-center justify-center shadow-xl shadow-purple-600/40 active:scale-90 transition-transform">
+                <span id="fab-icon" class="transition-transform duration-300">+</span>
+              </button>
+            </div>
+
+            <!-- 5. Floating LiquidTabBar with Asymmetric Stretch Indicator -->
+            <div class="relative z-30 px-3 pb-4 pt-1">
+              <div class="relative p-1 rounded-full bg-black/40 border border-white/15 backdrop-blur-2xl shadow-xl flex items-center justify-between">
+                <!-- Asymmetric Liquid Stretch Bubble -->
+                <div id="liquid-tab-bubble" class="absolute top-1 bottom-1 rounded-full bg-white/15 border border-white/20 transition-all duration-300 ease-out pointer-events-none"></div>
+
+                <button class="tab-item relative z-10 flex-1 py-2 text-center text-[10px] font-semibold text-white transition active:scale-95" data-index="0">
+                  Widgets
+                </button>
+                <button class="tab-item relative z-10 flex-1 py-2 text-center text-[10px] font-semibold text-zinc-400 hover:text-zinc-200 transition active:scale-95" data-index="1">
+                  Controls
+                </button>
+                <button class="tab-item relative z-10 flex-1 py-2 text-center text-[10px] font-semibold text-zinc-400 hover:text-zinc-200 transition active:scale-95" data-index="2">
+                  Profile
+                </button>
+              </div>
+            </div>
+
+            <!-- Centered Modal Component Preview -->
+            <div id="preview-modal" class="absolute inset-0 z-50 bg-black/60 backdrop-blur-md flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-300">
+              <div class="glass-surface p-6 rounded-3xl max-w-xs w-full text-center space-y-3 transform scale-90 transition-transform duration-300" id="modal-card">
+                <span class="text-2xl">✨</span>
+                <p class="text-sm font-bold text-white">Liquid Modal</p>
+                <p class="text-xs text-zinc-300 leading-relaxed">Translucent centered modal with VisionOS backdrop blurring and spring entry.</p>
+                <button id="close-modal-btn" class="w-full py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-xs font-semibold active:scale-95 transition">
+                  Dismiss Modal
+                </button>
+              </div>
+            </div>
+
+            <!-- Bottom Sheet Component Preview -->
+            <div id="preview-sheet" class="absolute inset-x-0 bottom-0 z-50 h-[380px] bg-black/40 backdrop-blur-md rounded-t-[32px] p-5 border-t border-white/20 transform translate-y-full transition-transform duration-300 flex flex-col justify-between">
+              <div>
+                <div class="w-10 h-1 bg-white/30 rounded-full mx-auto mb-4 cursor-grab"></div>
+                <p class="text-sm font-bold text-white mb-1">Liquid Bottom Drawer</p>
+                <p class="text-xs text-zinc-300 mb-4">Supports elastic rubber-banding drag gestures and velocity springs.</p>
+                <div class="p-3.5 rounded-2xl bg-white/5 border border-white/10 text-xs text-zinc-300 space-y-2">
+                  <p class="font-semibold text-white">Native Gesture Detection</p>
+                  <p class="text-[11px] text-zinc-400">Powered by react-native-gesture-handler PanGesture.</p>
+                </div>
+              </div>
+              <button id="close-sheet-btn" class="w-full py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-xl text-xs font-semibold transition active:scale-95">
+                Close Drawer
+              </button>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Live Interactive Controls & Props Playground -->
+      <div class="lg:col-span-5 space-y-6">
+        <div class="glass-surface p-6 rounded-3xl border border-white/15 space-y-6">
+          <div>
+            <h2 class="text-xl font-bold tracking-tight">Live Material Playground</h2>
+            <p class="text-xs text-zinc-400 mt-1">Adjust live glass tokens and see components react in real-time.</p>
+          </div>
+
+          <!-- Controls List -->
+          <div class="space-y-5">
+            <!-- Blur Strength Slider -->
+            <div>
+              <div class="flex justify-between text-xs font-semibold mb-2">
+                <span class="text-zinc-300">Blur Intensity (expo-blur)</span>
+                <span id="blur-val" class="text-purple-400 font-mono">55%</span>
+              </div>
+              <input type="range" id="blur-slider" min="10" max="100" value="55" class="w-full accent-purple-500 bg-white/10 rounded-lg cursor-pointer">
+            </div>
+
+            <!-- Theme Mode Selection -->
+            <div>
+              <span class="block text-xs font-semibold text-zinc-300 mb-2">Simulator Mode</span>
+              <div class="grid grid-cols-2 gap-2">
+                <button id="mode-dark" class="py-2 px-3 rounded-xl bg-purple-600/30 border border-purple-500/50 text-xs font-semibold text-purple-200 transition">
+                  Obsidian Dark
+                </button>
+                <button id="mode-light" class="py-2 px-3 rounded-xl bg-white/5 border border-white/10 text-xs font-semibold text-zinc-400 hover:text-white transition">
+                  Clean iOS Light
+                </button>
+              </div>
+            </div>
+
+            <!-- Border Glow Toggle -->
+            <div class="flex items-center justify-between py-2 border-t border-white/10">
+              <div>
+                <p class="text-xs font-semibold text-zinc-300">Specular Border Rim Light</p>
+                <p class="text-[11px] text-zinc-500">Continuous edge reflection</p>
+              </div>
+              <input type="checkbox" id="glow-toggle" checked class="w-5 h-5 accent-purple-500 rounded cursor-pointer">
+            </div>
+
+            <!-- Parallax Tilt Toggle -->
+            <div class="flex items-center justify-between py-2 border-t border-white/10">
+              <div>
+                <p class="text-xs font-semibold text-zinc-300">3D Parallax Hover</p>
+                <p class="text-[11px] text-zinc-500">Perspective mouse/touch tilt</p>
+              </div>
+              <input type="checkbox" id="tilt-toggle" checked class="w-5 h-5 accent-purple-500 rounded cursor-pointer">
+            </div>
+          </div>
+        </div>
+
+        <!-- Generated Code Box -->
+        <div class="glass-surface p-6 rounded-3xl border border-white/15 space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-zinc-300 font-mono">Active React Native JSX</span>
+            <button id="copy-code-btn" class="px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-xs font-medium text-zinc-200 transition active:scale-95">
+              Copy JSX
+            </button>
+          </div>
+          <pre class="bg-black/50 p-4 rounded-2xl text-xs font-mono text-cyan-300 overflow-x-auto border border-white/10 leading-relaxed" id="live-code-snippet">
+&lt;LiquidCard
+  intensity={55}
+  interactive={true}
+  shadowDepth="medium"
+  borderGlow={true}
+  borderRadius={24}
+&gt;
+  &lt;Text&gt;Midnight Refraction&lt;/Text&gt;
+  &lt;LiquidButton
+    variant="primary"
+    title="Tap Liquid Ripple"
+    liquidRipple={true}
+  /&gt;
+&lt;/LiquidCard&gt;</pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Component Suite Catalog -->
+  <section id="components" class="relative z-10 max-w-7xl mx-auto px-6 py-16 border-t border-white/10">
+    <div class="text-center max-w-3xl mx-auto mb-12">
+      <h2 class="text-3xl md:text-4xl font-extrabold tracking-tight">Component Suite</h2>
+      <p class="text-sm text-zinc-400 mt-2">8 production-ready glass components optimized for Reanimated 3 and Skia.</p>
+    </div>
+
+    <!-- Component Cards Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      
+      <!-- LiquidView -->
+      <div class="glass-surface p-5 rounded-3xl flex flex-col justify-between">
+        <div>
+          <span class="text-xs font-bold text-purple-400 font-mono">Primitive</span>
+          <h3 class="text-base font-bold text-white mt-1">LiquidView</h3>
+          <p class="text-xs text-zinc-400 mt-2 leading-relaxed">The foundational glass surface. Supports static values and Reanimated SharedValues for dynamic blur without re-renders.</p>
+        </div>
+        <code class="mt-4 block p-2.5 rounded-xl bg-black/40 text-[11px] font-mono text-cyan-300 border border-white/5 truncate">
+          &lt;LiquidView intensity={50}&gt;
+        </code>
+      </div>
+
+      <!-- LiquidCard -->
+      <div class="glass-surface p-5 rounded-3xl flex flex-col justify-between">
+        <div>
+          <span class="text-xs font-bold text-cyan-400 font-mono">Interactive</span>
+          <h3 class="text-base font-bold text-white mt-1">LiquidCard</h3>
+          <p class="text-xs text-zinc-400 mt-2 leading-relaxed">Card primitive with 3D parallax tilt, specular shine sweep, and multi-tier soft shadows.</p>
+        </div>
+        <code class="mt-4 block p-2.5 rounded-xl bg-black/40 text-[11px] font-mono text-cyan-300 border border-white/5 truncate">
+          &lt;LiquidCard interactive /&gt;
+        </code>
+      </div>
+
+      <!-- LiquidButton -->
+      <div class="glass-surface p-5 rounded-3xl flex flex-col justify-between">
+        <div>
+          <span class="text-xs font-bold text-pink-400 font-mono">Control</span>
+          <h3 class="text-base font-bold text-white mt-1">LiquidButton</h3>
+          <p class="text-xs text-zinc-400 mt-2 leading-relaxed">Tactile button with Skia circular liquid ripple originating from touch coordinates and spring scale bounce.</p>
+        </div>
+        <code class="mt-4 block p-2.5 rounded-xl bg-black/40 text-[11px] font-mono text-cyan-300 border border-white/5 truncate">
+          &lt;LiquidButton variant="primary" /&gt;
+        </code>
+      </div>
+
+      <!-- LiquidTabBar -->
+      <div class="glass-surface p-5 rounded-3xl flex flex-col justify-between">
+        <div>
+          <span class="text-xs font-bold text-amber-400 font-mono">Navigation</span>
+          <h3 class="text-base font-bold text-white mt-1">LiquidTabBar</h3>
+          <p class="text-xs text-zinc-400 mt-2 leading-relaxed">Floating tab bar with an asymmetric stretching liquid bubble indicator simulating surface tension.</p>
+        </div>
+        <code class="mt-4 block p-2.5 rounded-xl bg-black/40 text-[11px] font-mono text-cyan-300 border border-white/5 truncate">
+          &lt;LiquidTabBar routes={...} /&gt;
+        </code>
+      </div>
+
+      <!-- LiquidNavbar -->
+      <div class="glass-surface p-5 rounded-3xl flex flex-col justify-between">
+        <div>
+          <span class="text-xs font-bold text-blue-400 font-mono">Navigation</span>
+          <h3 class="text-base font-bold text-white mt-1">LiquidNavbar</h3>
+          <p class="text-xs text-zinc-400 mt-2 leading-relaxed">Scroll-linked header that dynamically transitions from clear to frosted glass on scroll offset.</p>
+        </div>
+        <code class="mt-4 block p-2.5 rounded-xl bg-black/40 text-[11px] font-mono text-cyan-300 border border-white/5 truncate">
+          &lt;LiquidNavbar scrollY={...} /&gt;
+        </code>
+      </div>
+
+      <!-- LiquidFAB -->
+      <div class="glass-surface p-5 rounded-3xl flex flex-col justify-between">
+        <div>
+          <span class="text-xs font-bold text-emerald-400 font-mono">Floating</span>
+          <h3 class="text-base font-bold text-white mt-1">LiquidFAB</h3>
+          <p class="text-xs text-zinc-400 mt-2 leading-relaxed">Floating action button with Skia metaball fusion separating actions on expand.</p>
+        </div>
+        <code class="mt-4 block p-2.5 rounded-xl bg-black/40 text-[11px] font-mono text-cyan-300 border border-white/5 truncate">
+          &lt;LiquidFAB actions={...} /&gt;
+        </code>
+      </div>
+
+      <!-- LiquidModal -->
+      <div class="glass-surface p-5 rounded-3xl flex flex-col justify-between">
+        <div>
+          <span class="text-xs font-bold text-purple-400 font-mono">Overlay</span>
+          <h3 class="text-base font-bold text-white mt-1">LiquidModal</h3>
+          <p class="text-xs text-zinc-400 mt-2 leading-relaxed">Centered glass dialog with backdrop blur, spring arrival, and coordinated dismiss timing.</p>
+        </div>
+        <code class="mt-4 block p-2.5 rounded-xl bg-black/40 text-[11px] font-mono text-cyan-300 border border-white/5 truncate">
+          &lt;LiquidModal visible={...} /&gt;
+        </code>
+      </div>
+
+      <!-- LiquidSheet -->
+      <div class="glass-surface p-5 rounded-3xl flex flex-col justify-between">
+        <div>
+          <span class="text-xs font-bold text-rose-400 font-mono">Overlay</span>
+          <h3 class="text-base font-bold text-white mt-1">LiquidSheet</h3>
+          <p class="text-xs text-zinc-400 mt-2 leading-relaxed">Draggable bottom drawer with rubber-band resistance and velocity-based dismissal.</p>
+        </div>
+        <code class="mt-4 block p-2.5 rounded-xl bg-black/40 text-[11px] font-mono text-cyan-300 border border-white/5 truncate">
+          &lt;LiquidSheet isOpen={...} /&gt;
+        </code>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Installation & Integration Guide -->
+  <section id="installation" class="relative z-10 max-w-7xl mx-auto px-6 py-16 border-t border-white/10">
+    <div class="max-w-3xl mx-auto space-y-8">
+      <div>
+        <h2 class="text-3xl font-extrabold tracking-tight">Installation Guide</h2>
+        <p class="text-sm text-zinc-400 mt-2">Get started in your Expo SDK 54 or React Native project in under a minute.</p>
+      </div>
+
+      <!-- Step 1 -->
+      <div class="space-y-3">
+        <h3 class="text-base font-bold text-white">1. Install Dependencies</h3>
+        <pre class="bg-black/50 p-4 rounded-2xl text-xs font-mono text-cyan-300 overflow-x-auto border border-white/10">
+npx expo install liquidglass-rn @shopify/react-native-skia expo-blur react-native-reanimated react-native-gesture-handler react-native-svg lucide-react-native</pre>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="space-y-3">
+        <h3 class="text-base font-bold text-white">2. Add Reanimated Babel Plugin</h3>
+        <p class="text-xs text-zinc-400">Ensure the plugin is added as the last item in your `babel.config.js`:</p>
+        <pre class="bg-black/50 p-4 rounded-2xl text-xs font-mono text-cyan-300 overflow-x-auto border border-white/10">
+module.exports = function(api) {
+  api.cache(true);
+  return {
+    presets: ['babel-preset-expo'],
+    plugins: ['react-native-reanimated/plugin'],
+  };
+};</pre>
+      </div>
+
+      <!-- Step 3 -->
+      <div class="space-y-3">
+        <h3 class="text-base font-bold text-white">3. Wrap Application Root</h3>
+        <pre class="bg-black/50 p-4 rounded-2xl text-xs font-mono text-cyan-300 overflow-x-auto border border-white/10">
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { LiquidThemeProvider } from 'liquidglass-rn';
+
+export default function App() {
+  return (
+    &lt;GestureHandlerRootView style={{ flex: 1 }}&gt;
+      &lt;LiquidThemeProvider defaultMode="system"&gt;
+        &lt;YourApp /&gt;
+      &lt;/LiquidThemeProvider&gt;
+    &lt;/GestureHandlerRootView&gt;
+  );
+}</pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="relative z-10 border-t border-white/10 py-12 px-6 bg-black/40">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6 text-xs text-zinc-400">
+      <div>
+        <p class="font-bold text-white text-sm">liquidglass-rn</p>
+        <p class="mt-1">MIT License © 2026 Junaed Khandakar</p>
+      </div>
+
+      <div class="flex items-center gap-6 font-medium">
+        <a href="https://github.com/junaedkhandakar/liquidglass-rn" target="_blank" rel="noopener noreferrer" class="hover:text-white transition">GitHub</a>
+        <a href="https://www.npmjs.com/package/liquidglass-rn" target="_blank" rel="noopener noreferrer" class="hover:text-white transition">npm</a>
+        <a href="https://github.com/junaedkhandakar/liquidglass-rn/issues" target="_blank" rel="noopener noreferrer" class="hover:text-white transition">Issues</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
