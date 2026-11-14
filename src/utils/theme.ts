@@ -26,13 +26,13 @@ export const lightTheme: LiquidThemeColors = {
 
 export const darkTheme: LiquidThemeColors = {
   isDark: true,
-  background: '#0B0B0E', // Sleek VisionOS deep obsidian
-  glassFill: 'rgba(20, 20, 25, 0.55)',
-  glassBorder: 'rgba(255, 255, 255, 0.15)',
-  glowColor: 'rgba(138, 43, 226, 0.35)', // Vibrant neon purple
-  textColor: '#F5F5F7',
-  subtextColor: '#A1A1A6',
-  accentColor: '#BF5AF2', // VisionOS neon purple/pink
-  accentGlow: 'rgba(191, 90, 242, 0.45)',
-  shadowColor: 'rgba(0, 0, 0, 0.45)',
+  background: '#000000', // Apple iOS true OLED black
+  glassFill: 'rgba(255, 255, 255, 0.11)', // Apple iOS Control Center thin glass fill
+  glassBorder: 'rgba(255, 255, 255, 0.18)', // Apple iOS crisp hairline border
+  glowColor: 'rgba(255, 255, 255, 0.15)', // Subtle specular edge sheen
+  textColor: '#FFFFFF',
+  subtextColor: '#8E8E93', // iOS secondary label grey
+  accentColor: '#0A84FF', // Apple iOS system blue
+  accentGlow: 'rgba(10, 132, 255, 0.35)',
+  shadowColor: 'rgba(0, 0, 0, 0.35)',
 };

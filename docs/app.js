@@ -72,14 +72,14 @@ document.addEventListener('DOMContentLoaded', () => {
   function setSimulatorTheme(dark) {
     isSimulatorDark = dark;
     if (dark) {
-      phoneScreen.classList.remove('bg-[#EAEBF0]', 'light');
-      phoneScreen.classList.add('bg-[#0B0B0E]');
-      modeDarkBtn.className = 'py-2 px-3 rounded-xl bg-purple-600/30 border border-purple-500/50 text-xs font-semibold text-purple-200 transition';
+      phoneScreen.classList.remove('ios-wallpaper-light', 'light');
+      phoneScreen.classList.add('ios-wallpaper-dark');
+      modeDarkBtn.className = 'py-2 px-3 rounded-xl bg-blue-600/30 border border-blue-500/50 text-xs font-semibold text-blue-200 transition';
       modeLightBtn.className = 'py-2 px-3 rounded-xl bg-white/5 border border-white/10 text-xs font-semibold text-zinc-400 hover:text-white transition';
     } else {
-      phoneScreen.classList.remove('bg-[#0B0B0E]');
-      phoneScreen.classList.add('bg-[#EAEBF0]', 'light');
-      modeLightBtn.className = 'py-2 px-3 rounded-xl bg-purple-600/30 border border-purple-500/50 text-xs font-semibold text-purple-200 transition';
+      phoneScreen.classList.remove('ios-wallpaper-dark');
+      phoneScreen.classList.add('ios-wallpaper-light', 'light');
+      modeLightBtn.className = 'py-2 px-3 rounded-xl bg-blue-600/30 border border-blue-500/50 text-xs font-semibold text-blue-200 transition';
       modeDarkBtn.className = 'py-2 px-3 rounded-xl bg-white/5 border border-white/10 text-xs font-semibold text-zinc-400 hover:text-white transition';
     }
     updateLiveCode();
@@ -445,16 +445,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function updateLiveCode() {
     liveCodeSnippet.textContent = `<LiquidCard
+  stylePreset="ios"
   intensity={${currentBlur}}
-  interactive={${isTiltEnabled}}
+  interactive={true}
   shadowDepth="medium"
-  borderGlow={${isGlowEnabled}}
-  borderRadius={24}
+  borderRadius={28}
 >
-  <Text>Midnight Refraction</Text>
+  <Text style={styles.title}>Midnight Refraction</Text>
   <LiquidButton
     variant="primary"
-    title="Tap Liquid Ripple"
+    title="Tactile Liquid Button"
     liquidRipple={true}
   />
 </LiquidCard>`;

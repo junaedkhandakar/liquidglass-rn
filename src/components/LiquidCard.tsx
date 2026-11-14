@@ -13,7 +13,8 @@ import { glassStyles, layoutStyles } from '../utils/glassStyles';
 import { useTheme } from '../hooks/useTheme';
 
 export interface LiquidCardProps extends LiquidViewProps {
-  interactive?: boolean;        // 3D parallax tilt and hover effect
+  stylePreset?: 'ios' | 'visionos'; // 'ios' = flat tactile spring press & sheen (default), 'visionos' = 3D parallax tilt
+  interactive?: boolean;        // Enables press & touch feedback
   shineSpeed?: number;          // Speed of continuous specular shine in ms (0 to disable)
   shineOnTouch?: boolean;       // Flash shine sweep when tapped
   shadowDepth?: 'low' | 'medium' | 'high';
@@ -22,6 +23,7 @@ export interface LiquidCardProps extends LiquidViewProps {
 const AnimatedLinearGradient = Animated.createAnimatedComponent(Svg);
 
 export const LiquidCard: React.FC<LiquidCardProps> = ({
+  stylePreset = 'ios',
   interactive = true,
   shineSpeed = 4000,
   shineOnTouch = true,
@@ -36,8 +38,9 @@ export const LiquidCard: React.FC<LiquidCardProps> = ({
   const { theme } = useTheme();
 
   // Hooks for interactions
+  const isVisionOS = stylePreset === 'visionos';
   const { tiltStyle, tiltHandlers, setDimensions } = use3DTiltAnimation(10, 10);
-  const { pressStyle } = usePressAnimation(0.98);
+  const { pressStyle, pressHandlers } = usePressAnimation(0.97);
   const { shineProgress, triggerManualShine } = useShineAnimation(
     shineSpeed,
     shineSpeed > 0
@@ -49,7 +52,7 @@ export const LiquidCard: React.FC<LiquidCardProps> = ({
   const handleLayout = (e: LayoutChangeEvent) => {
     const { width, height } = e.nativeEvent.layout;
     containerWidth.value = width;
-    setDimensions(width, height);
+    if (isVisionOS) setDimensions(width, height);
     if (props.onLayout) props.onLayout(e);
   };
 
@@ -79,7 +82,8 @@ export const LiquidCard: React.FC<LiquidCardProps> = ({
 
   // Combine interactive elements
   const combinedHandlers = {
-    ...(interactive ? tiltHandlers : {}),
+    ...(interactive && isVisionOS ? tiltHandlers : {}),
+    ...(interactive && !isVisionOS ? pressHandlers : {}),
     onLayout: handleLayout,
     onTouchStart: handleTouchStart,
   };
@@ -89,7 +93,7 @@ export const LiquidCard: React.FC<LiquidCardProps> = ({
       style={[
         styles.shadowWrapper,
         cardShadow,
-        interactive && tiltStyle,
+        interactive && isVisionOS && tiltStyle,
         interactive && pressStyle,
         style as ViewStyle,
       ]}
