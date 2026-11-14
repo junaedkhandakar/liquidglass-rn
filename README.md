@@ -208,6 +208,32 @@ Button with Skia circular liquid ripple, diagonal shine, and spring scale.
 | `disabled` | `boolean` | `false` | Disables interaction and dims opacity. |
 | `title` | `string` | `undefined` | Button text label. |
 
+### LiquidSlider
+
+Apple Control Center capsule slider with gesture drag tracking and spring momentum.
+
+```tsx
+<LiquidSlider
+  value={0.65}
+  onValueChange={(val) => console.log(val)}
+  label="Brightness"
+  height={56}
+  borderRadius={22}
+  intensity={50}
+/>
+```
+
+| Prop | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `value` | `number` | `undefined` | Controlled value (0 to 1). |
+| `defaultValue` | `number` | `0.5` | Default value (0 to 1). |
+| `onValueChange` | `(value: number) => void` | `undefined` | Drag progress callback. |
+| `haptics` | `boolean` | `true` | Haptic feedback on boundary ticks. |
+| `label` | `string` | `undefined` | Slider label text. |
+| `icon` | `ReactNode` | `undefined` | Left slot icon. |
+| `height` | `number` | `56` | Capsule height in px. |
+| `borderRadius` | `number` | `22` | Capsule corner radius. |
+
 ### LiquidTabBar
 
 Floating glass tab bar with asymmetric stretching indicator bubble.

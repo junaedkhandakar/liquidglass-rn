@@ -10,6 +10,7 @@ import Animated, {
 import { LiquidView } from './LiquidView';
 import { useTheme } from '../hooks/useTheme';
 import { layoutStyles } from '../utils/glassStyles';
+import { triggerHaptic } from '../utils/haptics';
 import * as Icons from 'lucide-react-native';
 
 export interface TabRoute {
@@ -22,6 +23,7 @@ export interface LiquidTabBarProps {
   routes: TabRoute[];
   activeIndex: number;
   onChange: (index: number) => void;
+  haptics?: boolean;
   activeColor?: string;
   inactiveColor?: string;
 }
@@ -42,6 +44,7 @@ export const LiquidTabBar: React.FC<LiquidTabBarProps> = ({
   routes,
   activeIndex,
   onChange,
+  haptics = true,
   activeColor,
   inactiveColor,
 }) => {
@@ -95,6 +98,20 @@ export const LiquidTabBar: React.FC<LiquidTabBarProps> = ({
     });
   };
 
+  const handleTabPress = (idx: number) => {
+    if (idx !== activeIndex) {
+      if (haptics) triggerHaptic('selection');
+      onChange(idx);
+    }
+  };
+
+  const handleDragEnd = (nearestIdx: number) => {
+    if (nearestIdx !== activeIndex) {
+      if (haptics) triggerHaptic('selection');
+      onChange(nearestIdx);
+    }
+  };
+
   // Interactive drag-and-drop gesture across the tab bar
   const panGesture = Gesture.Pan()
     .onStart(() => {
@@ -114,7 +131,7 @@ export const LiquidTabBar: React.FC<LiquidTabBarProps> = ({
       if (barWidth > 0 && count > 0) {
         const tabSlotWidth = barWidth / count;
         const nearestIndex = Math.max(0, Math.min(count - 1, Math.floor(endX / tabSlotWidth)));
-        runOnJS(onChange)(nearestIndex);
+        runOnJS(handleDragEnd)(nearestIndex);
       }
     });
 
@@ -180,7 +197,7 @@ export const LiquidTabBar: React.FC<LiquidTabBarProps> = ({
               <Pressable
                 key={route.key}
                 onLayout={(e) => handleTabLayout(index, e)}
-                onPress={() => onChange(index)}
+                onPress={() => handleTabPress(index)}
                 style={styles.tabItem}
               >
                 <View style={layoutStyles.center}>

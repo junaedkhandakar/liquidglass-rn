@@ -145,14 +145,14 @@ export const LiquidView: React.FC<LiquidViewProps> = ({
       onLayout={handleLayout}
       style={[
         styles.container,
-        { borderRadius },
+        { borderRadius, borderCurve: 'continuous' as any },
         borderGlow && glassStyles.glows.accent(activeGlowColor),
         style,
       ]}
       {...props}
     >
       {/* Background blur and overlay layers */}
-      <View style={[layoutStyles.absoluteFill, layoutStyles.overflowHidden, { borderRadius }]}>
+      <View style={[layoutStyles.absoluteFill, layoutStyles.overflowHidden, { borderRadius, borderCurve: 'continuous' as any }]}>
         {experimentalSkia && dimensions.width > 0 && dimensions.height > 0 && refractionEffect ? (
           // FIX BUG #7: Two-pass Skia approach:
           // 1. BackdropFilter blurs the scene behind this canvas.
@@ -189,6 +189,7 @@ export const LiquidView: React.FC<LiquidViewProps> = ({
               borderWidth: 1,
               borderColor: tintProps.borderColor,
               borderRadius,
+              borderCurve: 'continuous' as any,
             },
           ]}
         />

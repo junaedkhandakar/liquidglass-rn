@@ -13,6 +13,7 @@ import { usePressAnimation, useShineAnimation } from '../hooks/useLiquidAnimatio
 import { useTheme } from '../hooks/useTheme';
 import { glassStyles, layoutStyles } from '../utils/glassStyles';
 import { LIQUID_FUSION_COLOR_MATRIX } from '../shaders/liquidShader';
+import { triggerHaptic } from '../utils/haptics';
 
 export interface LiquidButtonProps extends PressableProps {
   variant?: 'primary' | 'secondary' | 'glass';
@@ -20,6 +21,7 @@ export interface LiquidButtonProps extends PressableProps {
   shineOnPress?: boolean;       // Slider specular highlight across button on press
   scaleOnPress?: boolean;       // Tactile bounce scale down
   glow?: boolean;               // Pulsing neon backing glow
+  haptics?: boolean;            // Apple tactile haptic feedback
   title?: string;
   style?: ViewStyle | ViewStyle[];
   textStyle?: TextStyle;
@@ -34,6 +36,7 @@ export const LiquidButton: React.FC<LiquidButtonProps> = ({
   shineOnPress = true,
   scaleOnPress = true,
   glow = false,
+  haptics = true,
   title,
   style,
   textStyle,
@@ -64,6 +67,10 @@ export const LiquidButton: React.FC<LiquidButtonProps> = ({
 
   const handlePressIn = (e: GestureResponderEvent) => {
     if (disabled) return;
+
+    if (haptics) {
+      triggerHaptic('impactLight');
+    }
 
     // 1. Trigger tactile spring shrink
     pressHandlers.onPressIn();
