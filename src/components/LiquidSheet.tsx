@@ -118,12 +118,18 @@ export const LiquidSheet: React.FC<LiquidSheetProps> = ({
       
       {/* Backdrop fading overlay */}
       <Animated.View style={[styles.backdrop, backdropStyle]}>
-        <Pressable style={StyleSheet.absoluteFill} onPress={handleClose} />
+        <Pressable
+          style={StyleSheet.absoluteFill}
+          onPress={handleClose}
+          accessibilityRole="button"
+          accessibilityLabel="Close sheet"
+        />
       </Animated.View>
 
       {/* Drag gesture area + Glass Sheet */}
       <GestureDetector gesture={panGesture}>
         <Animated.View
+          accessibilityViewIsModal
           style={[
             styles.sheetContainer,
             { height, borderTopLeftRadius: borderRadius, borderTopRightRadius: borderRadius },

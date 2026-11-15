@@ -3,6 +3,20 @@ export { LiquidView, LiquidViewProps } from './components/LiquidView';
 export { LiquidCard, LiquidCardProps } from './components/LiquidCard';
 export { LiquidButton, LiquidButtonProps } from './components/LiquidButton';
 export { LiquidSlider, LiquidSliderProps } from './components/LiquidSlider';
+export { LiquidSwitch, LiquidSwitchProps } from './components/LiquidSwitch';
+export {
+  LiquidSegmentedControl,
+  LiquidSegmentedControlProps,
+  Segment,
+} from './components/LiquidSegmentedControl';
+export { LiquidSearchBar, LiquidSearchBarProps } from './components/LiquidSearchBar';
+export { LiquidIconButton, LiquidIconButtonProps } from './components/LiquidIconButton';
+export {
+  LiquidProgressBar,
+  LiquidProgressBarProps,
+  LiquidSpinner,
+  LiquidSpinnerProps,
+} from './components/LiquidProgress';
 export { LiquidTabBar, LiquidTabBarProps, TabRoute } from './components/LiquidTabBar';
 export { LiquidNavbar, LiquidNavbarProps } from './components/LiquidNavbar';
 export { LiquidModal, LiquidModalProps } from './components/LiquidModal';
@@ -11,6 +25,12 @@ export { LiquidSheet, LiquidSheetProps } from './components/LiquidSheet';
 
 // Hooks exports
 export { useTheme, LiquidThemeProvider } from './hooks/useTheme';
+export {
+  useLiquidConfig,
+  LiquidConfigProvider,
+  LiquidConfig,
+  LiquidConfigContextType,
+} from './hooks/useLiquidConfig';
 export {
   usePressAnimation,
   useShineAnimation,

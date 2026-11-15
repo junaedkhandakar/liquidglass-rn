@@ -132,6 +132,23 @@ const { theme, isDark, toggleTheme, setThemeMode, themeMode } = useTheme();
 
 ## Components
 
+| Component | Description |
+| :--- | :--- |
+| `LiquidView` | Base frosted glass surface primitive. |
+| `LiquidCard` | Tactile card with specular sheen and shadow presets. |
+| `LiquidButton` | Button with Skia liquid ripple and spring press. |
+| `LiquidSlider` | Control Center capsule slider with drag tracking. |
+| `LiquidSwitch` | iOS toggle with a liquid stretching knob. |
+| `LiquidSegmentedControl` | iOS segmented control with sliding indicator. |
+| `LiquidSearchBar` | Frosted search capsule with focus glow. |
+| `LiquidIconButton` | Circular glass icon button. |
+| `LiquidProgressBar` / `LiquidSpinner` | Progress bar and activity indicator. |
+| `LiquidTabBar` | Floating tab bar with asymmetric liquid indicator. |
+| `LiquidNavbar` | Scroll-linked frosted header. |
+| `LiquidModal` | Centered glass modal. |
+| `LiquidFAB` | Floating action button with metaball fusion. |
+| `LiquidSheet` | Draggable bottom drawer with rubber-banding. |
+
 ### LiquidView
 
 Base glass surface primitive. Supports static blur values and Reanimated `SharedValue<number>`.
@@ -255,8 +272,115 @@ Floating glass tab bar with asymmetric stretching indicator bubble.
 | `routes` | `TabRoute[]` | Required | Array of `{ key, title, icon }`. |
 | `activeIndex` | `number` | Required | Active tab index. |
 | `onChange` | `(index: number) => void` | Required | Tab select callback. |
+| `haptics` | `boolean` | `true` | Selection haptic on tab change. |
 | `activeColor` | `string` | Theme accent | Active tab color. |
 | `inactiveColor` | `string` | Theme subtext | Inactive tab color. |
+
+### LiquidSegmentedControl
+
+Apple iOS segmented control with a sliding liquid glass indicator.
+
+```tsx
+<LiquidSegmentedControl
+  segments={[
+    { key: 'day', title: 'Day' },
+    { key: 'week', title: 'Week' },
+    { key: 'month', title: 'Month' },
+  ]}
+  activeIndex={range}
+  onChange={setRange}
+/>
+```
+
+| Prop | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `segments` | `Segment[]` | Required | Array of `{ key, title, icon? }`. |
+| `activeIndex` | `number` | Required | Selected segment index. |
+| `onChange` | `(index: number) => void` | Required | Selection callback. |
+| `haptics` | `boolean` | `true` | Selection haptic feedback. |
+| `height` | `number` | `34` | Track height in px. |
+| `borderRadius` | `number` | `10` | Track corner radius. |
+
+### LiquidSwitch
+
+Apple iOS toggle switch with a liquid glass knob that stretches while travelling.
+
+```tsx
+<LiquidSwitch value={enabled} onValueChange={setEnabled} />
+```
+
+| Prop | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `value` | `boolean` | Required | Current state. |
+| `onValueChange` | `(value: boolean) => void` | Required | State change callback. |
+| `disabled` | `boolean` | `false` | Disables interaction. |
+| `haptics` | `boolean` | `true` | Selection haptic feedback. |
+| `width` | `number` | `51` | Track width in px. |
+| `height` | `number` | `31` | Track height in px. |
+| `activeColor` | `string` | Theme accent | ON track color. |
+
+### LiquidSearchBar
+
+Frosted liquid glass search capsule with focus glow and clear button.
+
+```tsx
+<LiquidSearchBar
+  placeholder="Search"
+  value={query}
+  onChangeText={setQuery}
+  onSubmit={runSearch}
+/>
+```
+
+| Prop | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `placeholder` | `string` | `'Search'` | Placeholder text. |
+| `value` | `string` | `undefined` | Controlled text value. |
+| `onChangeText` | `(text: string) => void` | `undefined` | Text change callback. |
+| `onClear` | `() => void` | `undefined` | Clear button callback. |
+| `onSubmit` | `() => void` | `undefined` | Keyboard submit callback. |
+| `clearable` | `boolean` | `true` | Shows clear button when text present. |
+| `height` | `number` | `40` | Capsule height in px. |
+
+### LiquidIconButton
+
+Circular glass icon button with spring press compression.
+
+```tsx
+<LiquidIconButton
+  icon={<Bell size={20} color={theme.textColor} />}
+  variant="glass"
+  onPress={notify}
+  accessibilityLabel="Notifications"
+/>
+```
+
+| Prop | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `icon` | `ReactNode` | `undefined` | Icon element. |
+| `onPress` | `() => void` | `undefined` | Press callback. |
+| `size` | `number` | `44` | Diameter in px. |
+| `variant` | `'glass' \| 'filled' \| 'tinted'` | `'glass'` | Visual variant. |
+| `tintColor` | `string` | Theme accent | Tint color for `tinted` variant. |
+| `glow` | `boolean` | `false` | Accent glow halo. |
+| `haptics` | `boolean` | `true` | Impact haptic feedback. |
+
+### LiquidProgressBar & LiquidSpinner
+
+Apple-style progress bar with specular leading edge and an activity indicator.
+
+```tsx
+<LiquidProgressBar progress={0.65} />
+<LiquidProgressBar indeterminate />
+<LiquidSpinner size={28} />
+```
+
+| Prop | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `progress` | `number` | `0` | Progress value (0 to 1). |
+| `indeterminate` | `boolean` | `false` | Enables looping sweep animation. |
+| `height` | `number` | `6` | Track height in px. |
+| `color` | `string` | Theme accent | Fill color. |
 
 ### LiquidNavbar
 
@@ -318,6 +442,46 @@ Draggable bottom drawer with rubber-band resistance and velocity-based dismissal
 
 ---
 
+## Global Configuration
+
+Wrap your app once to control haptics, reduce motion, and library-wide defaults.
+
+```tsx
+import { LiquidConfigProvider } from 'liquidglass-rn';
+
+<LiquidConfigProvider
+  config={{
+    haptics: true,
+    reduceMotion: false,
+    defaultIntensity: 55,
+    experimentalSkia: false,
+  }}
+>
+  <App />
+</LiquidConfigProvider>
+```
+
+| Option | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `haptics` | `boolean` | `true` | Master switch for all haptic feedback. |
+| `reduceMotion` | `boolean` | auto | Disables non-essential animation. Auto-detects the OS setting. |
+| `defaultIntensity` | `number` | `50` | Default blur intensity for components. |
+| `experimentalSkia` | `boolean` | `false` | Enables the AGSL refraction pipeline globally. |
+| `defaultBorderRadius` | `number` | `20` | Default corner radius for glass surfaces. |
+
+Use the `useLiquidConfig()` hook to read or mutate the configuration at runtime.
+
+---
+
+## Accessibility
+
+- Every interactive component exposes proper `accessibilityRole`, `accessibilityState`, and `accessibilityLabel`.
+- The library automatically detects the OS **Reduce Motion** setting and disables parallax tilt, shine sweeps, and spring physics.
+- Tap targets meet the 44pt minimum recommended by Apple and Google.
+- Android hardware back button dismisses open sheets and modals.
+
+---
+
 ## Animation Hooks & Shaders
 
 ### Hooks
@@ -337,7 +501,17 @@ import { LIQUID_FUSION_COLOR_MATRIX, REFRACTION_SHADER } from 'liquidglass-rn';
 ```
 
 - `LIQUID_FUSION_COLOR_MATRIX`: 20-value color matrix thresholding blurred shapes into sharp metaballs.
-- `REFRACTION_SHADER`: AGSL runtime shader for Skia calculating wave distortion, lens center pinch, specular highlight, and rim lighting.
+- `REFRACTION_SHADER`: AGSL runtime shader for Skia calculating wave distortion, lens center pinch, chromatic dispersion, specular highlight, and rim lighting.
+
+### Haptics
+
+```tsx
+import { triggerHaptic } from 'liquidglass-rn';
+
+triggerHaptic('selection');
+triggerHaptic('impactLight');
+triggerHaptic('success');
+```
 
 ---
 

@@ -11,6 +11,8 @@ import { Canvas, Circle, Blur, ColorMatrix } from '@shopify/react-native-skia';
 import { useTheme } from '../hooks/useTheme';
 import { LIQUID_FUSION_COLOR_MATRIX } from '../shaders/liquidShader';
 import { APPLE_SPRING_CONFIG } from '../hooks/useLiquidAnimation';
+import { triggerHaptic } from '../utils/haptics';
+import { useLiquidConfig } from '../hooks/useLiquidConfig';
 import * as Icons from 'lucide-react-native';
 
 export interface FABAction {
@@ -23,6 +25,8 @@ export interface LiquidFABProps {
   icon?: keyof typeof Icons;
   actions: FABAction[];
   glow?: boolean;
+  haptics?: boolean;
+  accessibilityLabel?: string;
 }
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
@@ -42,8 +46,12 @@ export const LiquidFAB: React.FC<LiquidFABProps> = ({
   icon = 'Plus',
   actions,
   glow = true,
+  haptics = true,
+  accessibilityLabel = 'Open actions',
 }) => {
   const { theme } = useTheme();
+  const { haptics: globalHaptics, reduceMotion } = useLiquidConfig();
+  const useHaptics = haptics && globalHaptics;
   const [isOpen, setIsOpen] = useState(false);
 
   // Measure actual Skia canvas size via onLayout
@@ -54,11 +62,16 @@ export const LiquidFAB: React.FC<LiquidFABProps> = ({
   const animationProgress = useSharedValue(0);
 
   const toggleOpen = () => {
+    if (useHaptics) triggerHaptic('impactLight');
     setIsOpen((prev) => !prev);
-    animationProgress.value = withSpring(isOpen ? 0 : 1, {
-      ...APPLE_SPRING_CONFIG,
-      damping: isOpen ? 16 : 11,
-    });
+    animationProgress.value = reduceMotion
+      ? isOpen
+        ? 0
+        : 1
+      : withSpring(isOpen ? 0 : 1, {
+          ...APPLE_SPRING_CONFIG,
+          damping: isOpen ? 16 : 11,
+        });
   };
 
   // Main FAB sizing metrics
@@ -261,6 +274,8 @@ export const LiquidFAB: React.FC<LiquidFABProps> = ({
                   action.onPress();
                   toggleOpen();
                 }}
+                accessibilityRole="button"
+                accessibilityLabel={action.label}
                 style={[styles.actionPressable, { borderRadius: itemSize / 2 }]}
                 android_ripple={{ color: 'rgba(255, 255, 255, 0.3)' }}
               >
@@ -282,6 +297,9 @@ export const LiquidFAB: React.FC<LiquidFABProps> = ({
         {/* Main FAB Button */}
         <AnimatedPressable
           onPress={toggleOpen}
+          accessibilityRole="button"
+          accessibilityLabel={accessibilityLabel}
+          accessibilityState={{ expanded: isOpen }}
           style={[
             styles.mainFab,
             {

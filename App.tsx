@@ -21,6 +21,13 @@ import {
   LiquidModal,
   LiquidSheet,
   LiquidView,
+  LiquidSwitch,
+  LiquidSegmentedControl,
+  LiquidSearchBar,
+  LiquidIconButton,
+  LiquidProgressBar,
+  LiquidSpinner,
+  LiquidConfigProvider,
 } from './src/index';
 import * as Icons from 'lucide-react-native';
 
@@ -48,6 +55,10 @@ function Dashboard() {
   const [useSkiaRefraction, setUseSkiaRefraction] = useState(false);
   const [blurStrength, setBlurStrength] = useState(50);
   const [musicPlaying, setMusicPlaying] = useState(false);
+  const [liveSwitch, setLiveSwitch] = useState(true);
+  const [segmentIndex, setSegmentIndex] = useState(0);
+  const [searchText, setSearchText] = useState('');
+  const [loadProgress, setLoadProgress] = useState(0.35);
 
   // Ambient backdrop circles animated offsets
   const blob1X = useSharedValue(0);
@@ -93,6 +104,7 @@ function Dashboard() {
     { key: 'layouts', title: 'Widgets', icon: 'Layers' as const },
     { key: 'playground', title: 'Playground', icon: 'Sliders' as const },
     { key: 'overlays', title: 'Overlays', icon: 'Expand' as const },
+    { key: 'toolkit', title: 'Toolkit', icon: 'SlidersHorizontal' as const },
   ];
 
   // FAB Bubble configurations
@@ -397,6 +409,76 @@ function Dashboard() {
             </LiquidCard>
           </View>
         )}
+
+        {activeTab === 3 && (
+          <View style={styles.tabContent}>
+            <Text style={[styles.sectionTitle, { color: theme.textColor }]}>Apple UI Toolkit</Text>
+            <Text style={[styles.sectionSubtext, { color: theme.subtextColor }]}>
+              Segmented controls, toggles, search and progress rendered in liquid glass.
+            </Text>
+
+            <LiquidCard intensity={blurStrength} style={styles.widgetCard}>
+              <Text style={[styles.cardTitle, { color: theme.textColor }]}>Control Center</Text>
+              <Text style={[styles.cardSubtitle, { color: theme.subtextColor }]}>iOS-style toolkit</Text>
+
+              <View style={styles.controlBlock}>
+                <LiquidSegmentedControl
+                  segments={[
+                    { key: 'day', title: 'Day' },
+                    { key: 'week', title: 'Week' },
+                    { key: 'month', title: 'Month' },
+                  ]}
+                  activeIndex={segmentIndex}
+                  onChange={setSegmentIndex}
+                />
+              </View>
+
+              <View style={[styles.optionRow, { borderBottomWidth: 0 }]}>
+                <Text style={[styles.optionTitle, { color: theme.textColor }]}>Live Sync</Text>
+                <LiquidSwitch value={liveSwitch} onValueChange={setLiveSwitch} />
+              </View>
+
+              <View style={styles.controlBlock}>
+                <LiquidSearchBar
+                  placeholder="Search tracks"
+                  value={searchText}
+                  onChangeText={setSearchText}
+                  onClear={() => setSearchText('')}
+                />
+              </View>
+
+              <View style={styles.controlBlock}>
+                <View style={styles.optionInfoRow}>
+                  <Text style={[styles.optionTitle, { color: theme.textColor }]}>Buffering</Text>
+                  <Text style={[styles.optionMetric, { color: theme.accentColor }]}>
+                    {Math.round(loadProgress * 100)}%
+                  </Text>
+                </View>
+                <LiquidProgressBar progress={loadProgress} />
+              </View>
+
+              <View style={[styles.iconRow, { marginTop: 18 }]}>
+                <LiquidIconButton
+                  icon={<Icons.Search size={19} color={theme.textColor} />}
+                  onPress={() => setSearchText('query')}
+                  accessibilityLabel="Search"
+                />
+                <LiquidIconButton
+                  icon={<Icons.Settings size={19} color={theme.textColor} />}
+                  onPress={() => {}}
+                  accessibilityLabel="Settings"
+                />
+                <LiquidIconButton
+                  icon={<Icons.Plus size={19} color="#FFFFFF" />}
+                  variant="filled"
+                  onPress={() => {}}
+                  accessibilityLabel="Add"
+                />
+                <LiquidSpinner size={26} />
+              </View>
+            </LiquidCard>
+          </View>
+        )}
         
         {/* Spacer at bottom to prevent floating bar overlapping layout */}
         <View style={styles.bottomSpacer} />
@@ -468,7 +550,15 @@ export default function App() {
   return (
     <GestureHandlerRootView style={styles.gestureRoot}>
       <LiquidThemeProvider defaultMode="dark">
-        <Dashboard />
+        <LiquidConfigProvider
+          config={{
+            haptics: true,
+            defaultIntensity: 55,
+            experimentalSkia: false,
+          }}
+        >
+          <Dashboard />
+        </LiquidConfigProvider>
       </LiquidThemeProvider>
     </GestureHandlerRootView>
   );
@@ -651,6 +741,21 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     borderBottomWidth: 0.5,
     borderBottomColor: 'rgba(255,255,255,0.1)',
+  },
+  controlBlock: {
+    marginTop: 16,
+    marginBottom: 4,
+  },
+  optionInfoRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  iconRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
   optionTextColumn: {
     flex: 0.85,

@@ -306,6 +306,69 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => ripple.remove(), 650);
   });
 
+  // 7b. Apple iOS Segmented Control
+  const segmentedControl = document.getElementById('segmented-control');
+  const segmentIndicator = document.getElementById('segment-indicator');
+  const segmentButtons = document.querySelectorAll('.ios-segment-btn');
+
+  function moveSegment(index) {
+    const btn = segmentButtons[index];
+    if (!btn) return;
+    const rect = btn.getBoundingClientRect();
+    const containerRect = segmentedControl.getBoundingClientRect();
+    segmentIndicator.style.left = `${rect.left - containerRect.left}px`;
+    segmentIndicator.style.width = `${rect.width}px`;
+    segmentButtons.forEach((b, i) => b.classList.toggle('active', i === index));
+  }
+
+  segmentButtons.forEach((btn, idx) => {
+    btn.addEventListener('click', () => moveSegment(idx));
+  });
+  setTimeout(() => moveSegment(0), 60);
+  window.addEventListener('resize', () => {
+    const activeIdx = Array.from(segmentButtons).findIndex((b) => b.classList.contains('active'));
+    moveSegment(activeIdx >= 0 ? activeIdx : 0);
+  });
+
+  // 7c. Apple iOS Switch
+  const iosSwitch = document.getElementById('ios-switch');
+  if (iosSwitch) {
+    iosSwitch.addEventListener('click', () => {
+      iosSwitch.classList.toggle('on');
+    });
+  }
+
+  // 7d. Apple iOS Search Bar
+  const iosSearch = document.getElementById('ios-search');
+  const iosSearchInput = document.getElementById('ios-search-input');
+  const iosSearchClear = document.getElementById('ios-search-clear');
+  if (iosSearch && iosSearchInput) {
+    iosSearchInput.addEventListener('focus', () => iosSearch.classList.add('focused'));
+    iosSearchInput.addEventListener('blur', () => iosSearch.classList.remove('focused'));
+    iosSearchInput.addEventListener('input', () => {
+      iosSearchClear.classList.toggle('hidden', iosSearchInput.value.length === 0);
+      iosSearchClear.classList.toggle('flex', iosSearchInput.value.length > 0);
+    });
+    iosSearchClear.addEventListener('click', () => {
+      iosSearchInput.value = '';
+      iosSearchClear.classList.add('hidden');
+      iosSearchClear.classList.remove('flex');
+    });
+  }
+
+  // 7e. Apple iOS Progress Bar
+  const progressFill = document.getElementById('progress-fill');
+  const progressVal = document.getElementById('progress-val');
+  let progressValue = 35;
+  if (progressFill) {
+    // Auto-animate progress to demonstrate the fluid spring transition
+    setInterval(() => {
+      progressValue = progressValue >= 90 ? 15 : progressValue + 7;
+      progressFill.style.width = `${progressValue}%`;
+      progressVal.textContent = `${progressValue}%`;
+    }, 2200);
+  }
+
   // 8. Music Play/Pause toggle
   let isPlaying = false;
   simPlayBtn.addEventListener('click', (e) => {

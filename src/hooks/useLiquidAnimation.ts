@@ -9,6 +9,7 @@ import {
   interpolate,
 } from 'react-native-reanimated';
 import { GestureResponderEvent } from 'react-native';
+import { useLiquidConfig } from './useLiquidConfig';
 
 // Spring physics config mimicking Apple fluid dynamics
 export const APPLE_SPRING_CONFIG = {
@@ -27,6 +28,7 @@ export const APPLE_BOUNCE_CONFIG = {
  * Custom hook for tactile spring scale down and press gestures
  */
 export const usePressAnimation = (scaleTo = 0.96) => {
+  const { reduceMotion } = useLiquidConfig();
   const scale = useSharedValue(1);
   const isPressed = useSharedValue(false);
 
@@ -37,12 +39,14 @@ export const usePressAnimation = (scaleTo = 0.96) => {
   });
 
   const handlePressIn = () => {
-    scale.value = withSpring(scaleTo, APPLE_BOUNCE_CONFIG);
+    scale.value = reduceMotion
+      ? scaleTo
+      : withSpring(scaleTo, APPLE_BOUNCE_CONFIG);
     isPressed.value = true;
   };
 
   const handlePressOut = () => {
-    scale.value = withSpring(1, APPLE_SPRING_CONFIG);
+    scale.value = reduceMotion ? 1 : withSpring(1, APPLE_SPRING_CONFIG);
     isPressed.value = false;
   };
 
@@ -61,10 +65,11 @@ export const usePressAnimation = (scaleTo = 0.96) => {
  * Custom hook for sweeping specular shine highlight progress
  */
 export const useShineAnimation = (speed = 3000, autostart = true) => {
+  const { reduceMotion } = useLiquidConfig();
   const shineProgress = useSharedValue(-1.5); // Start off-screen left
 
   useEffect(() => {
-    if (autostart) {
+    if (autostart && !reduceMotion) {
       shineProgress.value = withRepeat(
         withTiming(1.5, {
           duration: speed,
@@ -73,10 +78,14 @@ export const useShineAnimation = (speed = 3000, autostart = true) => {
         -1, // Loop infinitely
         false // Do not reverse
       );
+    } else if (reduceMotion) {
+      // Park the sweep off-screen so no distracting motion plays.
+      shineProgress.value = -1.5;
     }
-  }, [speed, autostart]);
+  }, [speed, autostart, reduceMotion]);
 
   const triggerManualShine = (duration = 800) => {
+    if (reduceMotion) return;
     shineProgress.value = -1.5;
     shineProgress.value = withTiming(1.5, {
       duration,
@@ -99,6 +108,7 @@ export const useShineAnimation = (speed = 3000, autostart = true) => {
  * consuming component should call from its onLayout handler.
  */
 export const use3DTiltAnimation = (maxTiltX = 8, maxTiltY = 8) => {
+  const { reduceMotion } = useLiquidConfig();
   const rotateX = useSharedValue(0);
   const rotateY = useSharedValue(0);
   const glowX = useSharedValue(0);
@@ -142,6 +152,7 @@ export const use3DTiltAnimation = (maxTiltX = 8, maxTiltY = 8) => {
   });
 
   const handleTouchMove = (event: GestureResponderEvent) => {
+    if (reduceMotion) return;
     const { locationX, locationY } = event.nativeEvent;
     // Use measured dimensions from elementWidth/elementHeight shared values, guarded against 0
     const halfW = (elementWidth.value || 300) / 2;
@@ -156,6 +167,13 @@ export const use3DTiltAnimation = (maxTiltX = 8, maxTiltY = 8) => {
   };
 
   const handleTouchEnd = () => {
+    if (reduceMotion) {
+      rotateX.value = 0;
+      rotateY.value = 0;
+      glowX.value = 0;
+      glowY.value = 0;
+      return;
+    }
     rotateX.value = withSpring(0, APPLE_SPRING_CONFIG);
     rotateY.value = withSpring(0, APPLE_SPRING_CONFIG);
     glowX.value = withSpring(0, APPLE_SPRING_CONFIG);

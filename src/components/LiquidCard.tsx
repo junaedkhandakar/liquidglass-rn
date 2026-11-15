@@ -90,6 +90,8 @@ export const LiquidCard: React.FC<LiquidCardProps> = ({
 
   return (
     <Animated.View
+      accessibilityLabel={props.accessibilityLabel}
+      accessibilityRole={props.accessibilityRole}
       style={[
         styles.shadowWrapper,
         cardShadow,

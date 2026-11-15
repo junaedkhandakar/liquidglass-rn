@@ -14,6 +14,7 @@ import { useTheme } from '../hooks/useTheme';
 import { glassStyles, layoutStyles } from '../utils/glassStyles';
 import { LIQUID_FUSION_COLOR_MATRIX } from '../shaders/liquidShader';
 import { triggerHaptic } from '../utils/haptics';
+import { useLiquidConfig } from '../hooks/useLiquidConfig';
 
 export interface LiquidButtonProps extends PressableProps {
   variant?: 'primary' | 'secondary' | 'glass';
@@ -45,9 +46,13 @@ export const LiquidButton: React.FC<LiquidButtonProps> = ({
   ...props
 }) => {
   const { theme } = useTheme();
+  const { haptics: globalHaptics, reduceMotion } = useLiquidConfig();
+  const useHaptics = haptics && globalHaptics;
   
   // Interaction animations
-  const { pressStyle, pressHandlers } = usePressAnimation(scaleOnPress && !disabled ? 0.94 : 1);
+  const { pressStyle, pressHandlers } = usePressAnimation(
+    scaleOnPress && !disabled ? 0.94 : 1
+  );
   const { shineProgress, triggerManualShine } = useShineAnimation(3000, false);
   const [btnWidth, setBtnWidth] = useState(150);
   const [btnHeight, setBtnHeight] = useState(48);
@@ -68,7 +73,7 @@ export const LiquidButton: React.FC<LiquidButtonProps> = ({
   const handlePressIn = (e: GestureResponderEvent) => {
     if (disabled) return;
 
-    if (haptics) {
+    if (useHaptics) {
       triggerHaptic('impactLight');
     }
 
@@ -114,7 +119,6 @@ export const LiquidButton: React.FC<LiquidButtonProps> = ({
       transform: [{ translateX }, { skewX: '-25deg' }],
     };
   });
-
   // Specular ripple shader helper
   const skiaColor = variant === 'primary' ? 'rgba(255, 255, 255, 0.4)' : theme.accentColor;
 
@@ -151,6 +155,7 @@ export const LiquidButton: React.FC<LiquidButtonProps> = ({
   return (
     <AnimatedPressable
       accessibilityRole="button"
+      accessibilityLabel={props.accessibilityLabel ?? title}
       accessibilityState={{ disabled: !!disabled }}
       disabled={disabled}
       onLayout={handleLayout}
@@ -176,6 +181,7 @@ export const LiquidButton: React.FC<LiquidButtonProps> = ({
             borderColor: variantProps.borderColor,
             borderWidth: variant === 'glass' ? 0 : 1,
             borderRadius: 16,
+            borderCurve: 'continuous' as any,
           },
         ]}
       >
