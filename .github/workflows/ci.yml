@@ -14,11 +14,11 @@ concurrency:
 
 jobs:
   validate:
-    name: Typecheck & Validate (${{ matrix.node-version }})
+    name: Typecheck & Test (${{ matrix.node-version }})
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [20.x, 22.x]
+        node-version: [20.x, 22.x, 24.x]
 
     steps:
       - name: Checkout repository
@@ -31,7 +31,10 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm install
+        run: npm install --no-audit --no-fund
 
       - name: Run TypeScript typecheck
         run: npm run typecheck
+
+      - name: Run unit tests
+        run: npm test -- --ci

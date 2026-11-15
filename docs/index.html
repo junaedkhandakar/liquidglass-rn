@@ -240,7 +240,63 @@
               <div class="h-20"></div> <!-- Bottom Spacer -->
             </div>
 
-            <!-- 4. Viscous Apple Liquid Tab Bar with Surface Tension Physics -->
+            <!-- 4. Apple iOS Toolkit: Stepper, Rating, Badges, Alert -->
+            <div class="liquid-glass-card p-4 space-y-4 select-none">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-white">Inputs &amp; Feedback</span>
+                <span class="text-[10px] text-zinc-300 font-mono">iOS Toolkit</span>
+              </div>
+
+              <!-- Stepper -->
+              <div>
+                <span class="block text-xs font-semibold text-white mb-2">Quantity</span>
+                <div class="flex items-center gap-2">
+                  <button id="stepper-minus" class="w-10 h-10 rounded-xl bg-white/[0.08] border border-white/15 text-white text-lg flex items-center justify-center active:scale-90 transition">−</button>
+                  <div class="min-w-[56px] h-10 px-4 rounded-xl bg-white/[0.08] border border-white/15 flex items-center justify-center">
+                    <span id="stepper-value" class="text-sm font-bold text-white font-mono">3</span>
+                  </div>
+                  <button id="stepper-plus" class="w-10 h-10 rounded-xl bg-white/[0.08] border border-white/15 text-white text-lg flex items-center justify-center active:scale-90 transition">+</button>
+                </div>
+              </div>
+
+              <!-- Rating -->
+              <div>
+                <span class="block text-xs font-semibold text-white mb-2">Quality Rating</span>
+                <div id="rating-row" class="flex items-center gap-1.5">
+                  <button class="rating-star w-9 h-9 rounded-full bg-white/[0.08] border border-white/15 text-amber-400 text-lg flex items-center justify-center active:scale-90 transition" data-star="1">★</button>
+                  <button class="rating-star w-9 h-9 rounded-full bg-white/[0.08] border border-white/15 text-amber-400 text-lg flex items-center justify-center active:scale-90 transition" data-star="2">★</button>
+                  <button class="rating-star w-9 h-9 rounded-full bg-white/[0.08] border border-white/15 text-amber-400 text-lg flex items-center justify-center active:scale-90 transition" data-star="3">★</button>
+                  <button class="rating-star w-9 h-9 rounded-full bg-white/[0.08] border border-white/15 text-amber-400 text-lg flex items-center justify-center active:scale-90 transition" data-star="4">★</button>
+                  <button class="rating-star w-9 h-9 rounded-full bg-white/[0.08] border border-white/15 text-amber-400 text-lg flex items-center justify-center active:scale-90 transition" data-star="5">★</button>
+                </div>
+              </div>
+
+              <!-- Badges -->
+              <div class="flex flex-wrap items-center gap-2">
+                <span class="px-2.5 py-1 rounded-lg bg-green-500 text-white text-[11px] font-bold">New</span>
+                <span class="px-2.5 py-1 rounded-lg bg-purple-500/30 text-purple-300 text-[11px] font-bold border border-purple-500/40">Beta</span>
+                <span class="px-2.5 py-1 rounded-lg bg-white/10 text-white text-[11px] font-bold border border-white/15">Live</span>
+                <span class="px-2 py-1 rounded-lg bg-white/10 text-white text-[11px] font-bold border border-white/15 flex items-center gap-1">Updates <span class="px-1.5 rounded-full bg-white/25 text-[9px]">12</span></span>
+              </div>
+
+              <!-- Alert -->
+              <div class="flex items-start gap-2.5 p-3.5 rounded-2xl bg-white/[0.06] border border-white/12">
+                <span class="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center text-white text-[11px] font-bold shrink-0 mt-0.5">✓</span>
+                <div class="flex-1">
+                  <p class="text-xs font-bold text-white">Synced successfully</p>
+                  <p class="text-[11px] text-zinc-300 mt-0.5">Your library is up to date across all devices.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- 5. Apple iOS Toolbar Showcase -->
+            <div class="liquid-glass-card px-3 py-2.5 flex items-center justify-between">
+              <span class="w-9 h-9 rounded-full bg-white/10 border border-white/15 text-white flex items-center justify-center text-sm">‹</span>
+              <span class="text-sm font-bold text-white">Photos</span>
+              <span class="px-2 py-1 rounded-lg bg-white/10 text-white text-[11px] font-bold border border-white/15">24</span>
+            </div>
+
+            <!-- 6. Viscous Apple Liquid Tab Bar with Surface Tension Physics -->
             <div class="relative z-30 px-3 pb-4 pt-1">
               <div id="tab-nav-container" class="viscous-tab-capsule relative p-1 flex items-center justify-between cursor-pointer">
                 

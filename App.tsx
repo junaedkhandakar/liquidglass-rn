@@ -28,6 +28,11 @@ import {
   LiquidProgressBar,
   LiquidSpinner,
   LiquidConfigProvider,
+  LiquidStepper,
+  LiquidRating,
+  LiquidBadge,
+  LiquidToolbar,
+  LiquidAlert,
 } from './src/index';
 import * as Icons from 'lucide-react-native';
 
@@ -59,6 +64,8 @@ function Dashboard() {
   const [segmentIndex, setSegmentIndex] = useState(0);
   const [searchText, setSearchText] = useState('');
   const [loadProgress, setLoadProgress] = useState(0.35);
+  const [stepperValue, setStepperValue] = useState(3);
+  const [ratingValue, setRatingValue] = useState(4);
 
   // Ambient backdrop circles animated offsets
   const blob1X = useSharedValue(0);
@@ -477,6 +484,54 @@ function Dashboard() {
                 <LiquidSpinner size={26} />
               </View>
             </LiquidCard>
+
+            {/* Stepper + Rating + Badge + Alert */}
+            <LiquidCard intensity={blurStrength} style={styles.widgetCard}>
+              <Text style={[styles.cardTitle, { color: theme.textColor }]}>Inputs & Feedback</Text>
+              <Text style={[styles.cardSubtitle, { color: theme.subtextColor }]}>Stepper, rating, badges</Text>
+
+              <LiquidStepper
+                label="Quantity"
+                value={stepperValue}
+                min={0}
+                max={10}
+                onValueChange={setStepperValue}
+                style={{ marginTop: 16 }}
+              />
+
+              <View style={styles.controlBlock}>
+                <Text style={[styles.optionTitle, { color: theme.textColor, marginBottom: 10 }]}>
+                  Quality Rating
+                </Text>
+                <LiquidRating value={ratingValue} onValueChange={setRatingValue} />
+              </View>
+
+              <View style={[styles.iconRow, { marginTop: 20, flexWrap: 'wrap', gap: 8 }]}>
+                <LiquidBadge label="New" variant="filled" tintColor="#30D158" />
+                <LiquidBadge label="Beta" variant="tinted" tintColor="#BF5AF2" />
+                <LiquidBadge label="Live" variant="glass" />
+                <LiquidBadge label="Updates" count={12} variant="glass" />
+              </View>
+
+              <View style={{ marginTop: 18 }}>
+                <LiquidAlert
+                  visible
+                  variant="success"
+                  title="Synced successfully"
+                  message="Your library is up to date across all devices."
+                />
+              </View>
+            </LiquidCard>
+
+            {/* Toolbar showcase */}
+            <LiquidToolbar
+              title="Photos"
+              leading={<LiquidIconButton icon={<Icons.ChevronLeft size={20} color={theme.textColor} />} accessibilityLabel="Back" />}
+              trailing={
+                <LiquidBadge label="24" count={24} variant="glass" />
+              }
+              style={{ marginBottom: 20, borderRadius: 18 }}
+            />
           </View>
         )}
         

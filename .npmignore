@@ -6,6 +6,8 @@ App.tsx
 app.json
 babel.config.js
 tsconfig.json
+CONTRIBUTING.md
+CHANGELOG.md
 .git/
 .gitignore
 AGENTS.md

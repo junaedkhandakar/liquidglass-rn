@@ -143,6 +143,12 @@ const { theme, isDark, toggleTheme, setThemeMode, themeMode } = useTheme();
 | `LiquidSearchBar` | Frosted search capsule with focus glow. |
 | `LiquidIconButton` | Circular glass icon button. |
 | `LiquidProgressBar` / `LiquidSpinner` | Progress bar and activity indicator. |
+| `LiquidStepper` | iOS stepper with drag-to-scrub value. |
+| `LiquidRating` | Star rating rendered as frosted glass stars. |
+| `LiquidBadge` | Glass badge with optional counter. |
+| `LiquidToolbar` | Frosted glass navigation toolbar. |
+| `LiquidAlert` | Inline frosted glass banner. |
+| `LiquidListHeader` / `LiquidSectionList` | Collapsing large-title list header. |
 | `LiquidTabBar` | Floating tab bar with asymmetric liquid indicator. |
 | `LiquidNavbar` | Scroll-linked frosted header. |
 | `LiquidModal` | Centered glass modal. |
@@ -382,8 +388,88 @@ Apple-style progress bar with specular leading edge and an activity indicator.
 | `height` | `number` | `6` | Track height in px. |
 | `color` | `string` | Theme accent | Fill color. |
 
-### LiquidNavbar
+### LiquidStepper
 
+Apple iOS stepper. Tap the buttons or drag the glass body to scrub the value.
+
+```tsx
+<LiquidStepper label="Quantity" value={qty} min={0} max={10} onValueChange={setQty} />
+```
+
+| Prop | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `value` | `number` | Required | Current value. |
+| `onValueChange` | `(value: number) => void` | Required | Value change callback. |
+| `min` / `max` | `number` | `0` / `10` | Value bounds. |
+| `step` | `number` | `1` | Increment per tap. |
+| `label` | `string` | `undefined` | Label above the control. |
+| `haptics` | `boolean` | `true` | Selection haptic feedback. |
+
+### LiquidRating
+
+Apple style star rating with frosted glass stars.
+
+```tsx
+<LiquidRating value={rating} onValueChange={setRating} max={5} />
+```
+
+| Prop | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `value` | `number` | Required | Current rating. |
+| `onValueChange` | `(value: number) => void` | `undefined` | Rating change callback. |
+| `max` | `number` | `5` | Maximum rating. |
+| `size` | `number` | `36` | Star diameter in px. |
+
+### LiquidBadge
+
+Frosted glass badge with an optional counter bubble.
+
+```tsx
+<LiquidBadge label="New" variant="filled" tintColor="#30D158" />
+<LiquidBadge label="Updates" count={12} />
+```
+
+| Prop | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `label` | `string` | Required | Badge text. |
+| `count` | `number` | `undefined` | Counter bubble value. |
+| `variant` | `'glass' \| 'filled' \| 'tinted'` | `'glass'` | Visual variant. |
+| `size` | `'small' \| 'medium' \| 'large'` | `'medium'` | Badge size. |
+
+### LiquidToolbar
+
+Frosted glass navigation toolbar with leading, center and trailing slots.
+
+```tsx
+<LiquidToolbar
+  title="Photos"
+  leading={<BackButton />}
+  trailing={<ShareButton />}
+/>
+```
+
+### LiquidAlert
+
+Inline frosted glass banner with semantic variants.
+
+```tsx
+<LiquidAlert
+  visible
+  variant="success"
+  title="Synced successfully"
+  message="Your library is up to date across all devices."
+/>
+```
+
+| Prop | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `visible` | `boolean` | Required | Controls rendering. |
+| `title` | `string` | Required | Alert headline. |
+| `message` | `string` | `undefined` | Supporting copy. |
+| `variant` | `'info' \| 'success' \| 'warning' \| 'error'` | `'info'` | Semantic color. |
+| `action` | `ReactNode` | `undefined` | Trailing action slot. |
+
+### LiquidNavbar
 Scroll-linked header that fades from transparent to frosted glass based on scroll position.
 
 ```tsx

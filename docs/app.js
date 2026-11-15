@@ -369,6 +369,35 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 2200);
   }
 
+  // 7f. Apple iOS Stepper
+  const stepperValue = document.getElementById('stepper-value');
+  let stepper = 3;
+  const stepperMinus = document.getElementById('stepper-minus');
+  const stepperPlus = document.getElementById('stepper-plus');
+  const setStepper = (v) => {
+    stepper = Math.max(0, Math.min(10, v));
+    if (stepperValue) stepperValue.textContent = String(stepper);
+  };
+  if (stepperMinus) stepperMinus.addEventListener('click', () => setStepper(stepper - 1));
+  if (stepperPlus) stepperPlus.addEventListener('click', () => setStepper(stepper + 1));
+
+  // 7g. Apple iOS Rating
+  const ratingStars = document.querySelectorAll('.rating-star');
+  function paintRating(value) {
+    ratingStars.forEach((star, i) => {
+      const filled = i < value;
+      star.style.color = filled ? '#FFD60A' : 'rgba(255,255,255,0.28)';
+      star.style.background = filled ? 'rgba(255,214,10,0.14)' : 'rgba(255,255,255,0.08)';
+      star.style.borderColor = filled ? 'rgba(255,214,10,0.4)' : 'rgba(255,255,255,0.15)';
+    });
+  }
+  ratingStars.forEach((star) => {
+    star.addEventListener('click', () => {
+      paintRating(Number(star.dataset.star));
+    });
+  });
+  paintRating(4);
+
   // 8. Music Play/Pause toggle
   let isPlaying = false;
   simPlayBtn.addEventListener('click', (e) => {
